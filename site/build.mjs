@@ -7,7 +7,8 @@ const output = path.join(root, "dist");
 const siteUrl = "https://maaskk.github.io";
 const githubUrl = "https://github.com/Maaskk";
 const htbUrl = "https://app.hackthebox.com/profile";
-const assetVersion = "20260729-reading-pass";
+const exosignalUrl = "https://ashad.medghazli.com";
+const assetVersion = "20260729-signal-blue";
 const avatarSource =
   "https://berserk.fandom.com/wiki/File:1997_Anime_Guts_Portrait_in_the_post_Credit_Scene.png";
 
@@ -105,6 +106,7 @@ function sidebar() {
     <div class="rail-links">
       <a href="${githubUrl}" target="_blank" rel="noreferrer" aria-label="GitHub profile">GH</a>
       <a href="${htbUrl}" target="_blank" rel="noreferrer" aria-label="Hack The Box profile">HTB</a>
+      <a href="${exosignalUrl}" target="_blank" rel="noreferrer" aria-label="ExoSignal Observatory">EXO</a>
       <a href="/rss.xml" aria-label="RSS feed">RSS</a>
     </div>
     <a class="avatar-credit" href="${avatarSource}" target="_blank" rel="noreferrer">Guts · Berserk (1997) ↗</a>
@@ -120,7 +122,7 @@ function layout({ title, description, canonical, content, article = false }) {
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#0d0c0b">
+    <meta name="theme-color" content="#080b0f">
     <meta name="description" content="${escapeHtml(description)}">
     <link rel="canonical" href="${url}">
     <link rel="alternate" type="application/rss+xml" title="F1LEO Cybersecurity Journal" href="${siteUrl}/rss.xml">
@@ -279,7 +281,7 @@ const home = layout({
             </section>
             <section class="disclosure-card">
               <span class="status-dot"></span>
-              <div><strong>Recovered from real history</strong><p>Commands follow the saved Claude sessions. Flags and per-instance secrets show a recognizable prefix, then masking.</p></div>
+              <div><strong>Evidence-aware notes</strong><p>Entries distinguish preserved session history from public-path reconstructions. Flags and per-instance secrets remain masked.</p></div>
             </section>
           </aside>
         </div>
@@ -311,6 +313,7 @@ const home = layout({
           <div class="profile-links">
             <a href="${githubUrl}" target="_blank" rel="noreferrer"><span>Code & projects</span><strong>GitHub ↗</strong></a>
             <a href="${htbUrl}" target="_blank" rel="noreferrer"><span>Labs & progress</span><strong>Hack The Box ↗</strong></a>
+            <a href="${exosignalUrl}" target="_blank" rel="noreferrer"><span>Exoplanet research</span><strong>ExoSignal Observatory ↗</strong></a>
             <a href="/rss.xml"><span>Follow updates</span><strong>RSS feed ↗</strong></a>
           </div>
         </div>
@@ -320,7 +323,7 @@ const home = layout({
 
 function terminalLine(line = "") {
   const escaped = escapeHtml(line);
-  if (/^(flag_|N7SEC\{)/i.test(line.trim())) {
+  if (/^(flag_|user_|system_|N7SEC\{)/i.test(line.trim())) {
     return `<span class="term-flag">${escaped}</span>`;
   }
   const command = line.match(/^(\$|#|[a-z0-9_-]+@[a-z0-9_-]+[#$]|PS>)\s?(.*)$/i);
@@ -345,7 +348,7 @@ function terminal(session) {
     <figcaption>
       <span class="terminal-lights" aria-hidden="true"><i></i><i></i><i></i></span>
       <b>${escapeHtml(session.title || "terminal")}</b>
-      <small>reconstructed from saved history</small>
+      <small>reconstructed lab record</small>
     </figcaption>
     <pre><code>${session.lines.map((line) => terminalLine(line)).join("\n")}</code></pre>
   </figure>`;
@@ -453,7 +456,7 @@ function article(post) {
               <div><span>Result</span><strong>${escapeHtml(post.maskedFlag || "captured")}</strong></div>
             </div>
           </header>
-          <aside class="evidence-notice"><span>Lab note</span><p>Sensitive values, proof strings, credentials, and per-instance identifiers are intentionally masked.</p></aside>
+          <aside class="evidence-notice"><span>Provenance</span><p>${escapeHtml(post.evidenceNote || "Sensitive values, proof strings, credentials, and per-instance identifiers are intentionally masked.")}</p></aside>
           <details class="mobile-toc">
             <summary>On this page <span aria-hidden="true">⌄</span></summary>
             <ol>${tocItems}</ol>

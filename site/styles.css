@@ -1,5 +1,5 @@
 :root {
-  --ink: #0d0c0b;
+  --ink: #080b0f;
   --rail: rgba(15, 14, 13, 0.985);
   --surface: rgba(25, 23, 21, 0.97);
   --surface-solid: #191715;
@@ -56,8 +56,8 @@ input {
   z-index: 0;
   inset: 0;
   background:
-    linear-gradient(90deg, rgba(13, 12, 11, 0.82), rgba(13, 12, 11, 0.58)),
-    linear-gradient(180deg, rgba(13, 12, 11, 0.15), rgba(13, 12, 11, 0.82)),
+    linear-gradient(90deg, rgba(8, 11, 15, 0.82), rgba(8, 11, 15, 0.58)),
+    linear-gradient(180deg, rgba(8, 11, 15, 0.15), rgba(8, 11, 15, 0.82)),
     url("/og.jpg") center / cover no-repeat;
   filter: saturate(0.82) contrast(1.06);
 }
@@ -228,7 +228,7 @@ input {
 .site-canvas {
   min-width: 0;
   min-height: 100vh;
-  background: rgba(13, 12, 11, 0.46);
+  background: rgba(8, 11, 15, 0.46);
 }
 
 .topbar {
@@ -241,7 +241,7 @@ input {
   align-items: center;
   justify-content: space-between;
   gap: 28px;
-  background: rgba(13, 12, 11, 0.78);
+  background: rgba(8, 11, 15, 0.78);
   border-bottom: 1px solid var(--line);
   backdrop-filter: blur(18px);
 }
@@ -285,8 +285,8 @@ input {
 }
 
 .search-box:focus-within {
-  border-color: rgba(198, 107, 62, 0.7);
-  background: rgba(13, 12, 11, 0.74);
+  border-color: rgba(79, 143, 189, 0.7);
+  background: rgba(8, 11, 15, 0.74);
 }
 
 .search-box input {
@@ -346,7 +346,7 @@ input {
   gap: 40px;
   overflow: hidden;
   background:
-    linear-gradient(90deg, rgba(13, 12, 11, 0.94) 0%, rgba(13, 12, 11, 0.58) 58%, rgba(13, 12, 11, 0.2)),
+    linear-gradient(90deg, rgba(8, 11, 15, 0.94) 0%, rgba(8, 11, 15, 0.58) 58%, rgba(8, 11, 15, 0.2)),
     url("/og.jpg") center / cover;
   border: 1px solid var(--line-strong);
   border-radius: 18px;
@@ -384,7 +384,7 @@ input {
   flex: 0 0 auto;
   padding: 13px 16px;
   color: var(--paper);
-  background: rgba(13, 12, 11, 0.65);
+  background: rgba(8, 11, 15, 0.65);
   border: 1px solid var(--line-strong);
   border-radius: 8px;
   font: 9px/1 var(--mono);
@@ -572,7 +572,7 @@ input {
 .tag {
   padding: 7px 10px;
   color: var(--muted);
-  background: rgba(13, 12, 11, 0.3);
+  background: rgba(8, 11, 15, 0.3);
   border: 1px solid var(--line);
   border-radius: 999px;
   font: 9px/1 var(--mono);
@@ -628,7 +628,7 @@ a.tag:hover {
 
 .section-intro {
   padding: clamp(45px, 7vw, 95px) clamp(28px, 6vw, 80px);
-  background: rgba(13, 12, 11, 0.66);
+  background: rgba(8, 11, 15, 0.66);
   border: 1px solid var(--line);
   border-radius: 18px;
   backdrop-filter: blur(18px);
@@ -808,7 +808,7 @@ a.tag:hover {
 .article-header {
   margin-top: 38px;
   padding: clamp(38px, 6vw, 78px);
-  background: rgba(18, 16, 15, 0.87);
+  background: rgba(13, 18, 24, 0.87);
   border: 1px solid var(--line);
   border-radius: 18px;
   backdrop-filter: blur(20px);
@@ -865,8 +865,8 @@ a.tag:hover {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, transparent 50%, rgba(13, 12, 11, 0.72)),
-    linear-gradient(90deg, rgba(198, 107, 62, 0.08), transparent 45%);
+    linear-gradient(180deg, transparent 50%, rgba(8, 11, 15, 0.72)),
+    linear-gradient(90deg, rgba(79, 143, 189, 0.08), transparent 45%);
   pointer-events: none;
 }
 
@@ -901,7 +901,7 @@ a.tag:hover {
   gap: 25px;
   color: var(--muted);
   background: rgba(22, 18, 15, 0.9);
-  border: 1px solid rgba(198, 107, 62, 0.28);
+  border: 1px solid rgba(79, 143, 189, 0.28);
   border-radius: 12px;
 }
 
@@ -977,7 +977,7 @@ a.tag:hover {
 .article-body {
   margin-top: 25px;
   padding: 0 clamp(28px, 6vw, 70px);
-  background: rgba(18, 16, 15, 0.9);
+  background: rgba(13, 18, 24, 0.9);
   border: 1px solid var(--line);
   border-radius: 18px;
   backdrop-filter: blur(20px);
@@ -1146,7 +1146,7 @@ a.tag:hover {
   align-items: center;
   justify-content: space-between;
   color: var(--faint);
-  background: rgba(13, 12, 11, 0.74);
+  background: rgba(8, 11, 15, 0.74);
   border-top: 1px solid var(--line);
   font: 8px/1 var(--mono);
   letter-spacing: 0.08em;
@@ -1271,7 +1271,7 @@ a.tag:hover {
     flex-direction: column;
     justify-content: flex-end;
     background:
-      linear-gradient(0deg, rgba(13, 12, 11, 0.94), rgba(13, 12, 11, 0.12)),
+      linear-gradient(0deg, rgba(8, 11, 15, 0.94), rgba(8, 11, 15, 0.12)),
       url("/og.jpg") 66% center / cover;
   }
 
@@ -1361,19 +1361,19 @@ a.tag:hover {
 
 /* 0x00Jeff-inspired reading layout: quiet chrome, readable posts, useful TOC. */
 :root {
-  --ink: #0d0c0b;
-  --rail: rgba(15, 14, 13, 0.96);
-  --surface: rgba(25, 23, 21, 0.86);
-  --surface-solid: #191715;
-  --surface-hover: rgba(34, 31, 28, 0.94);
-  --paper: #eee8de;
-  --muted: #aaa39a;
-  --faint: #746e67;
-  --line: rgba(238, 232, 222, 0.12);
-  --line-strong: rgba(238, 232, 222, 0.22);
-  --copper: #c66b3e;
-  --copper-soft: #e1a17d;
-  --safe: #aabd8f;
+  --ink: #080b0f;
+  --rail: rgba(10, 14, 19, 0.97);
+  --surface: rgba(17, 23, 30, 0.9);
+  --surface-solid: #11171e;
+  --surface-hover: rgba(24, 33, 43, 0.97);
+  --paper: #edf3f8;
+  --muted: #b4c0cb;
+  --faint: #7d8a97;
+  --line: rgba(174, 197, 218, 0.13);
+  --line-strong: rgba(174, 197, 218, 0.25);
+  --copper: #4f8fbd;
+  --copper-soft: #8fc7e8;
+  --safe: #9fc88e;
   --sans: "Inter", "Helvetica Neue", Arial, sans-serif;
   --serif: "Iowan Old Style", "Baskerville", "Times New Roman", serif;
   --rail-width: 286px;
@@ -1382,18 +1382,18 @@ a.tag:hover {
 .backdrop {
   display: block;
   background:
-    linear-gradient(90deg, rgba(13, 12, 11, 0.92), rgba(13, 12, 11, 0.75)),
-    linear-gradient(180deg, rgba(13, 12, 11, 0.48), rgba(13, 12, 11, 0.93)),
+    linear-gradient(90deg, rgba(8, 11, 15, 0.94), rgba(8, 11, 15, 0.73)),
+    linear-gradient(180deg, rgba(8, 11, 15, 0.52), rgba(8, 11, 15, 0.94)),
     url("/og.jpg") center / cover no-repeat;
 }
 
 .site-canvas {
-  background: rgba(13, 12, 11, 0.68);
+  background: rgba(8, 11, 15, 0.68);
 }
 
 .profile-rail {
   padding: 42px 34px 28px;
-  background: rgba(15, 14, 13, 0.975);
+  background: rgba(10, 14, 19, 0.982);
   backdrop-filter: blur(20px);
 }
 
@@ -1402,7 +1402,7 @@ a.tag:hover {
   aspect-ratio: 1;
   overflow: hidden;
   display: block;
-  border: 1px solid rgba(225, 161, 125, 0.72);
+  border: 1px solid rgba(143, 199, 232, 0.72);
   border-radius: 50%;
   box-shadow:
     0 18px 50px rgba(0, 0, 0, 0.42),
@@ -1452,7 +1452,7 @@ a.tag:hover {
 
 .topbar {
   min-height: 64px;
-  background: rgba(13, 12, 11, 0.965);
+  background: rgba(8, 11, 15, 0.968);
   backdrop-filter: blur(18px);
 }
 
@@ -1466,7 +1466,7 @@ a.tag:hover {
   align-items: center;
   padding: 42px 48px;
   background:
-    linear-gradient(90deg, rgba(13, 12, 11, 0.985) 0%, rgba(13, 12, 11, 0.83) 61%, rgba(13, 12, 11, 0.48)),
+    linear-gradient(90deg, rgba(8, 11, 15, 0.985) 0%, rgba(8, 11, 15, 0.84) 61%, rgba(8, 11, 15, 0.5)),
     url("/og.jpg") center / cover;
   border-radius: 18px;
   box-shadow: 0 28px 80px rgba(0, 0, 0, 0.28);
@@ -1489,7 +1489,7 @@ a.tag:hover {
 
 .post-card {
   position: relative;
-  background: rgba(24, 22, 20, 0.975);
+  background: rgba(15, 21, 28, 0.975);
   border-radius: 14px;
   backdrop-filter: blur(18px);
 }
@@ -1510,7 +1510,7 @@ a.tag:hover {
   color: var(--ink);
   background: var(--copper-soft);
   border-radius: 9px;
-  box-shadow: 0 10px 28px rgba(198, 107, 62, 0.2);
+  box-shadow: 0 10px 28px rgba(79, 143, 189, 0.22);
   font: 800 15px/1 var(--mono);
 }
 
@@ -1522,7 +1522,7 @@ a.tag:hover {
 }
 
 .post-card p {
-  color: #cec6bd;
+  color: #c5d0da;
   font-size: 14px;
   line-height: 1.72;
 }
@@ -1552,7 +1552,7 @@ a.tag:hover {
 .article-header {
   margin-top: 30px;
   padding: clamp(32px, 4.5vw, 54px);
-  background: rgba(18, 16, 15, 0.975);
+  background: rgba(13, 18, 24, 0.98);
   border: 1px solid var(--line);
   border-radius: 18px;
   backdrop-filter: blur(20px);
@@ -1588,7 +1588,7 @@ a.tag:hover {
   display: grid;
   place-items: center;
   background:
-    radial-gradient(circle, rgba(38, 34, 31, 0.96) 0 55%, rgba(18, 16, 15, 0.98) 56%),
+    radial-gradient(circle, rgba(26, 35, 45, 0.96) 0 55%, rgba(13, 18, 24, 0.98) 56%),
     url("/og.jpg") center / cover;
   border: 10px solid var(--copper);
   border-radius: 50%;
@@ -1615,7 +1615,7 @@ a.tag:hover {
 
 .article-lead {
   margin: 32px 0 0;
-  color: #ded6cd;
+  color: #d7e0e7;
   font-family: var(--serif);
   font-size: 16px;
   line-height: 1.85;
@@ -1640,8 +1640,8 @@ a.tag:hover {
 .evidence-notice {
   margin-top: 30px;
   grid-template-columns: 150px 1fr;
-  background: rgba(27, 22, 19, 0.98);
-  border-color: rgba(198, 107, 62, 0.3);
+  background: rgba(15, 23, 31, 0.98);
+  border-color: rgba(79, 143, 189, 0.34);
   border-radius: 12px;
 }
 
@@ -1652,7 +1652,7 @@ a.tag:hover {
 .article-body {
   margin-top: 28px;
   padding: 0 clamp(28px, 5vw, 58px);
-  background: rgba(18, 16, 15, 0.985);
+  background: rgba(13, 18, 24, 0.985);
   border: 1px solid var(--line);
   border-radius: 18px;
   backdrop-filter: blur(20px);
@@ -1671,7 +1671,7 @@ a.tag:hover {
 
 .article-section h2 {
   margin: 0 0 18px;
-  color: #f3ede6;
+  color: #f0f5f9;
   font-family: var(--serif);
   font-size: 28px;
   font-weight: 400;
@@ -1685,7 +1685,7 @@ a.tag:hover {
 }
 
 .article-prose p {
-  color: #ddd5cc;
+  color: #d5dee6;
   font-size: 16px;
   line-height: 1.9;
 }
@@ -1749,7 +1749,7 @@ a.tag:hover {
   margin-top: 18px;
   padding: 17px 20px;
   color: var(--muted);
-  background: rgba(31, 28, 25, 0.9);
+  background: rgba(21, 29, 38, 0.92);
   border-left: 3px solid var(--copper);
 }
 
@@ -1800,7 +1800,7 @@ a.tag:hover {
 .article-toc a {
   position: relative;
   display: block;
-  color: #aaa198;
+  color: #aab8c4;
   font-size: 12px;
   line-height: 1.35;
   transition:
@@ -1844,7 +1844,7 @@ a.tag:hover {
   height: 100%;
   display: block;
   background: linear-gradient(90deg, var(--copper), var(--copper-soft));
-  box-shadow: 0 0 14px rgba(211, 122, 78, 0.5);
+  box-shadow: 0 0 14px rgba(79, 143, 189, 0.5);
   transform: scaleX(0);
   transform-origin: left;
 }
@@ -1881,7 +1881,7 @@ a.tag:hover {
   padding: 22px 24px;
   display: block;
   color: var(--paper);
-  background: rgba(24, 22, 20, 0.98);
+  background: rgba(15, 21, 28, 0.98);
   border: 1px solid var(--line);
   border-radius: 13px;
   transition:
@@ -1893,7 +1893,7 @@ a.tag:hover {
 .post-navigation a:hover,
 .further-reading-grid a:hover {
   background: var(--surface-hover);
-  border-color: rgba(240, 177, 138, 0.5);
+  border-color: rgba(143, 199, 232, 0.5);
   transform: translateY(-3px);
 }
 
@@ -2007,7 +2007,7 @@ input:focus-visible {
     margin-top: 22px;
     display: block;
     color: var(--paper);
-    background: rgba(18, 16, 15, 0.98);
+    background: rgba(13, 18, 24, 0.98);
     border: 1px solid var(--line);
     border-radius: 12px;
   }
@@ -2056,7 +2056,7 @@ input:focus-visible {
     min-height: 300px;
     padding: 28px;
     background:
-      linear-gradient(0deg, rgba(13, 12, 11, 0.95), rgba(13, 12, 11, 0.22)),
+      linear-gradient(0deg, rgba(8, 11, 15, 0.96), rgba(8, 11, 15, 0.24)),
       url("/og.jpg") 66% center / cover;
   }
 
