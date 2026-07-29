@@ -50,16 +50,20 @@ export default function RootLayout({
       <body>
         <div className="noise" aria-hidden="true" />
         <header className="site-header">
-          <Link href="/" className="brand" aria-label="F1LEO Field Notes home">
+          <a
+            href="https://maaskk.github.io"
+            className="brand"
+            aria-label="F1LEO Field Notes home"
+          >
             <Mark />
             <span>
               <b>F1LEO</b>
               <small>FIELD NOTES / #MA</small>
             </span>
-          </Link>
+          </a>
           <nav aria-label="Primary navigation">
-            <Link href="/#notes">Notes</Link>
-            <Link href="/#protocol">Protocol</Link>
+            <a href="https://maaskk.github.io/#notes">Notes</a>
+            <a href="https://maaskk.github.io/#protocol">Protocol</a>
             <a
               href="https://github.com/Maaskk"
               target="_blank"
@@ -84,7 +88,7 @@ export default function RootLayout({
             <p>Built from evidence, not aesthetics alone.</p>
           </div>
           <div className="footer-links">
-            <a href="/rss.xml">RSS</a>
+            <a href="https://maaskk.github.io/rss.xml">RSS</a>
             <Link href="/studio">Private studio</Link>
           </div>
           <p className="footer-signature">f1leo // #MA</p>

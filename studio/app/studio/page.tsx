@@ -1,5 +1,4 @@
 import { cookies } from "next/headers";
-import Link from "next/link";
 import StudioForm from "@/app/components/studio-form";
 import { isOwner, readSession, SESSION_COOKIE } from "@/lib/auth";
 
@@ -24,7 +23,7 @@ export default async function StudioPage() {
         >
           Continue with GitHub →
         </a>
-        <Link href="/">← Return to the journal</Link>
+        <a href="https://maaskk.github.io">← Return to the journal</a>
       </main>
     );
   }
@@ -41,7 +40,7 @@ export default async function StudioPage() {
         <a className="button-primary" href="/api/auth/signout">
           Sign out
         </a>
-        <Link href="/">← Return to the journal</Link>
+        <a href="https://maaskk.github.io">← Return to the journal</a>
       </main>
     );
   }
@@ -58,7 +57,7 @@ export default async function StudioPage() {
           </p>
         </div>
         <div className="studio-header-actions">
-          <Link href="/">View journal ↗</Link>
+          <a href="https://maaskk.github.io">View journal ↗</a>
           <a href="/api/auth/signout">Sign out</a>
         </div>
       </header>
