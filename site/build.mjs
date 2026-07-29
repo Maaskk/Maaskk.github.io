@@ -7,7 +7,7 @@ const output = path.join(root, "dist");
 const siteUrl = "https://maaskk.github.io";
 const githubUrl = "https://github.com/Maaskk";
 const htbUrl = "https://app.hackthebox.com/profile";
-const assetVersion = "20260729-field-journal";
+const assetVersion = "20260729-reading-pass";
 const avatarSource =
   "https://berserk.fandom.com/wiki/File:1997_Anime_Guts_Portrait_in_the_post_Credit_Scene.png";
 
@@ -71,10 +71,18 @@ const raw = JSON.parse(
   await readFile(path.join(root, "content", "journal.json"), "utf8"),
 );
 const posts = raw
-  .filter((post) => post && post.slug && post.title && post.summary)
+  .filter(
+    (post) =>
+      post &&
+      post.publish !== false &&
+      post.slug &&
+      post.title &&
+      post.summary,
+  )
   .sort(
     (a, b) =>
-      new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
+      new Date(a.completedAt).getTime() - new Date(b.completedAt).getTime() ||
+      new Date(a.publishedAt).getTime() - new Date(b.publishedAt).getTime(),
   );
 
 const tags = [...new Set(posts.flatMap((post) => post.tags ?? []))].sort();
@@ -87,7 +95,6 @@ function sidebar() {
       <strong>f1leo</strong>
       <small>#MA</small>
     </a>
-    <p class="identity-copy">Cybersecurity labs, AI security, forensics, and the paths that actually reached a flag.</p>
     <nav class="side-nav" aria-label="Journal navigation">
       <a href="/#home" data-view-link="home"><span>⌂</span>Home</a>
       <a href="/#categories" data-view-link="categories"><span>▤</span>Categories</a>
@@ -127,7 +134,8 @@ function layout({ title, description, canonical, content, article = false }) {
     <meta name="twitter:card" content="summary_large_image">
     <title>${escapeHtml(pageTitle)}</title>
   </head>
-  <body>
+  <body class="${article ? "article-layout" : ""}">
+    ${article ? '<div class="reading-progress" aria-hidden="true"><span></span></div>' : ""}
     <div class="backdrop" aria-hidden="true"></div>
     <div class="app-shell">
       ${sidebar()}
@@ -139,7 +147,7 @@ function layout({ title, description, canonical, content, article = false }) {
         </footer>
       </div>
     </div>
-    <script src="/app.js" defer></script>
+    <script src="/app.js?v=${assetVersion}" defer></script>
   </body>
 </html>`;
 }
@@ -178,7 +186,8 @@ function postCard(post) {
 }
 
 function recentList() {
-  return posts
+  return [...posts]
+    .reverse()
     .slice(0, 5)
     .map(
       (post) =>
@@ -244,16 +253,16 @@ const home = layout({
       <section class="view-panel active" data-view="home">
         <div class="cover-card reference-cover">
           <div>
-            <span class="micro-label">F1LEO / OFFENSIVE SECURITY NOTES</span>
+            <span class="micro-label">F1LEO / FIELD JOURNAL</span>
             <h1>Writeups and progress logs.</h1>
-            <p>Completed paths and substantial unfinished investigations reconstructed from my saved terminal history. No scoreboard filler, no invented completions.</p>
+            <p>A chronological record of solved labs and investigations that produced a real technical result.</p>
           </div>
           <a href="${htbUrl}" target="_blank" rel="noreferrer">f1leo on HTB ↗</a>
         </div>
         <div class="content-grid">
           <section class="post-feed" aria-label="Journal entries">
             <div class="feed-heading">
-              <div><span class="micro-label">LATEST</span><h2>Writeups & investigations</h2></div>
+              <div><span class="micro-label">OLDEST → NEWEST</span><h2>Writeups & investigations</h2></div>
               <span><b data-visible-count>${posts.length}</b> published</span>
             </div>
             <div class="empty-search" data-empty-search hidden>No notes match that search.</div>
@@ -287,7 +296,7 @@ const home = layout({
       </section>
 
       <section class="view-panel" data-view="archives" hidden>
-        <header class="section-intro"><span class="micro-label">TIMELINE</span><h1>Archives</h1><p>Everything published, newest first.</p></header>
+        <header class="section-intro"><span class="micro-label">TIMELINE</span><h1>Archives</h1><p>Everything published, from the first solved lab to the latest.</p></header>
         <div class="archive-list">${archiveRows}</div>
       </section>
 
@@ -369,10 +378,56 @@ function comments(post) {
   </section>`;
 }
 
+function readingNeighbors(post) {
+  const index = posts.findIndex((candidate) => candidate.slug === post.slug);
+  return {
+    previous: index > 0 ? posts[index - 1] : null,
+    next: index >= 0 && index < posts.length - 1 ? posts[index + 1] : null,
+  };
+}
+
+function relatedPosts(post) {
+  const postTags = new Set(post.tags ?? []);
+  return posts
+    .filter((candidate) => candidate.slug !== post.slug)
+    .map((candidate) => ({
+      post: candidate,
+      score:
+        (candidate.platform === post.platform ? 4 : 0) +
+        (candidate.operatingSystem === post.operatingSystem ? 2 : 0) +
+        (candidate.tags ?? []).filter((tag) => postTags.has(tag)).length * 3,
+    }))
+    .sort(
+      (a, b) =>
+        b.score - a.score ||
+        new Date(b.post.completedAt).getTime() -
+          new Date(a.post.completedAt).getTime(),
+    )
+    .slice(0, 3)
+    .map(({ post: candidate }) => candidate);
+}
+
+function compactPostLink(post) {
+  if (!post) return "";
+  return `<a href="/notes/${escapeHtml(post.slug)}/">
+    <span>${escapeHtml(post.platform)} · ${formatDate(post.completedAt)}</span>
+    <strong>${escapeHtml(post.title)}</strong>
+    <p>${escapeHtml(post.summary)}</p>
+  </a>`;
+}
+
 function article(post) {
   const externalUrl = safeUrl(post.externalUrl);
   const heroIcon = safeUrl(post.heroIcon);
   const sections = post.sections ?? [];
+  const { previous, next } = readingNeighbors(post);
+  const related = relatedPosts(post);
+  const tocItems = `${sections
+    .map(
+      (section, index) =>
+        `<li><a data-toc-link href="#step-${String(index + 1).padStart(2, "0")}">${escapeHtml(section.title)}</a></li>`,
+    )
+    .join("")}<li><a data-toc-link href="#comments">Comments</a></li>`;
   return layout({
     title: post.title,
     description: post.summary,
@@ -395,19 +450,34 @@ function article(post) {
             <div class="article-facts">
               <div><span>Target</span><strong>${escapeHtml(post.target || "—")}</strong></div>
               <div><span>System</span><strong>${escapeHtml(post.operatingSystem)}</strong></div>
-              <div><span>Flag</span><strong>${escapeHtml(post.maskedFlag || "captured")}</strong></div>
+              <div><span>Result</span><strong>${escapeHtml(post.maskedFlag || "captured")}</strong></div>
             </div>
           </header>
-          <aside class="evidence-notice"><span>Recovered writeup</span><p>${escapeHtml(post.evidenceNote || "Steps are reconstructed from saved terminal history. Per-instance secrets are partially masked.")}</p></aside>
+          <aside class="evidence-notice"><span>Lab note</span><p>Sensitive values, proof strings, credentials, and per-instance identifiers are intentionally masked.</p></aside>
+          <details class="mobile-toc">
+            <summary>On this page <span aria-hidden="true">⌄</span></summary>
+            <ol>${tocItems}</ol>
+          </details>
           <div class="article-body">${sections.map(articleSection).join("")}</div>
           <footer class="article-footer">
             <div><span class="micro-label">TOOLS / TAGS</span><div class="tag-cloud">${[...(post.tools ?? []), ...(post.tags ?? [])].map((item) => `<span class="tag">#${escapeHtml(item)}</span>`).join("")}</div></div>
             ${externalUrl ? `<a href="${externalUrl}" target="_blank" rel="noreferrer">External reference ↗</a>` : '<a href="/#home">Return to journal →</a>'}
           </footer>
+          <nav class="post-navigation" aria-label="Previous and next writeups">
+            ${previous ? `<div><span>← Previous</span>${compactPostLink(previous)}</div>` : ""}
+            ${next ? `<div class="next-post"><span>Next →</span>${compactPostLink(next)}</div>` : ""}
+          </nav>
+          <section class="further-reading" aria-labelledby="further-reading-title">
+            <div class="section-heading">
+              <span class="micro-label">CONTINUE READING</span>
+              <h2 id="further-reading-title">Further reading</h2>
+            </div>
+            <div class="further-reading-grid">${related.map(compactPostLink).join("")}</div>
+          </section>
           ${comments(post)}
         </div>
-        <aside class="article-toc">
-          <section><h2>Contents</h2><ol>${sections.map((section, index) => `<li><a href="#step-${String(index + 1).padStart(2, "0")}">${escapeHtml(section.title)}</a></li>`).join("")}<li><a href="#comments">Comments</a></li></ol></section>
+        <aside class="article-toc" data-article-toc>
+          <section><h2>Contents</h2><ol>${tocItems}</ol></section>
           <section><h2>Trending tags</h2><div class="tag-cloud">${(post.tags ?? []).slice(0, 7).map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}</div></section>
         </aside>
       </main>`,

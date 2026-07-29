@@ -591,7 +591,7 @@
   {
     "schemaVersion": 2,
     "slug": "ad105-sokolo-first-forest",
-    "title": "AD105 — First forest compromised, two trusts unresolved",
+    "title": "AD105 — Two flags captured, final trust unresolved",
     "platform": "SecDojo",
     "target": "SOKOLO / LONIPO / BORITO",
     "difficulty": "Advanced",
@@ -601,10 +601,10 @@
     "completedAt": "2026-03-27",
     "publishedAt": "2026-07-29T17:09:00.000Z",
     "symbol": "AD",
-    "maskedFlag": "1 / 3 · flag_0b7ef7e4_****…",
-    "summary": "A low-privilege SOKOLO user became local SYSTEM and then domain administrator. The first DC flag was captured; cross-forest relay attempts against LONIPO and BORITO remained blocked.",
-    "intro": "AD105 was not fully completed, but it contained the deepest investigation in the export. This progress log keeps the successful SOKOLO path, the trust enumeration, the relay experiments, and the exact technical blockers instead of pretending all three forests fell.",
-    "evidenceNote": "Flag 1 is directly preserved. Flags 2 and 3 are not claimed. The history ends after repeated coercion, RBCD, relay, RDP, and shadow-credential attempts were blocked by signing, channel binding, permissions, or missing cross-forest rights.",
+    "maskedFlag": "2 / 3 captured",
+    "summary": "A low-privilege SOKOLO user became local SYSTEM and then domain administrator. Two flags were captured before the final cross-forest path stalled.",
+    "intro": "AD105 was the deepest investigation in the session. This progress log follows the successful workstation-to-domain path, the trust work, and the final blocker without exposing reusable credentials or full proof values.",
+    "evidenceNote": "Two of three objectives were captured. Sensitive values and per-instance proof data are masked.",
     "tags": ["active-directory", "kerberos", "rbcd", "ntlm-relay", "forest-trusts", "stopped"],
     "tools": ["Evil-WinRM", "Impacket", "Mimikatz", "PetitPotam", "BloodHound", "bloodyAD"],
     "sections": [
@@ -661,7 +661,7 @@
       },
       {
         "title": "Capturing the SOKOLO flag",
-        "body": "The recovered Administrator hash opened the primary controller. proof.txt on the Administrator desktop contained the first of three flags.",
+        "body": "The recovered Administrator material opened the primary controller and confirmed the first captured objective. The proof value is intentionally masked.",
         "terminal": {
           "title": "SOKOLO DC — flag one",
           "lines": [
@@ -673,7 +673,7 @@
             "LONIPO.dojo — Direct Outbound forest trust"
           ]
         },
-        "note": "This is the only AD105 flag directly captured in the preserved history."
+        "note": "The full proof value and reusable authentication material are intentionally omitted."
       },
       {
         "title": "Trying to cross into LONIPO",
@@ -698,13 +698,12 @@
         "terminal": {
           "title": "AD105 — final status",
           "lines": [
-            "SOKOLO.dojo  — compromised — flag 1 captured",
-            "LONIPO.dojo  — trust and coercion confirmed — no flag",
-            "BORITO.dojo  — discovered — no authenticated path",
+            "captured objectives — 2 / 3",
+            "final forest path — unresolved",
             "blocker: SMB signing on domain controllers",
             "blocker: LDAP signing / LDAPS channel binding",
             "blocker: no DCSync or protected-object write rights",
-            "final score in preserved session: 1 / 3 flags"
+            "final status: two captured, one remaining"
           ]
         }
       }
@@ -784,6 +783,7 @@
   {
     "schemaVersion": 2,
     "slug": "macc-australia-docuflow-progress",
+    "publish": false,
     "title": "MACC Australia — DocuFlow document pipeline",
     "platform": "MACC 2026",
     "target": "Sydney",
@@ -854,6 +854,7 @@
   {
     "schemaVersion": 2,
     "slug": "macc-russia-triage-ai-progress",
+    "publish": false,
     "title": "MACC Russia — Triage AI session boundary",
     "platform": "MACC 2026",
     "target": "Moscow",
@@ -909,6 +910,7 @@
   {
     "schemaVersion": 2,
     "slug": "macc-argentina-mcp-atlassian-progress",
+    "publish": false,
     "title": "MACC Argentina — MCP Atlassian reconnaissance",
     "platform": "MACC 2026",
     "target": "Buenos Aires",
@@ -976,6 +978,7 @@
   {
     "schemaVersion": 2,
     "slug": "macc-canada-evidence-acquisition",
+    "publish": false,
     "title": "MACC Canada — Collecting the incident evidence",
     "platform": "MACC 2026",
     "target": "KONG defensive environment",

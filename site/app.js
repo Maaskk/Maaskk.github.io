@@ -6,6 +6,11 @@ const cards = [...document.querySelectorAll("[data-post-card]")];
 const emptySearch = document.querySelector("[data-empty-search]");
 const count = document.querySelector("[data-visible-count]");
 const menuButton = document.querySelector(".menu-button");
+const tocLinks = [...document.querySelectorAll("[data-toc-link]")];
+const articleSections = [
+  ...document.querySelectorAll(".article-section[id], .comments[id]"),
+];
+const readingProgress = document.querySelector(".reading-progress span");
 
 function showView(requested) {
   if (!views.length) return;
@@ -74,6 +79,62 @@ menuButton?.addEventListener("click", () => {
   const open = document.body.classList.toggle("nav-open");
   menuButton.setAttribute("aria-expanded", String(open));
 });
+
+for (const link of tocLinks) {
+  link.addEventListener("click", (event) => {
+    const id = link.getAttribute("href")?.slice(1);
+    const target = id ? document.getElementById(id) : null;
+    if (!target) return;
+    event.preventDefault();
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+    history.replaceState(null, "", `#${id}`);
+    link.closest("details")?.removeAttribute("open");
+  });
+}
+
+function markActiveSection(id) {
+  for (const link of tocLinks) {
+    const active = link.getAttribute("href") === `#${id}`;
+    link.classList.toggle("active", active);
+    if (active) link.setAttribute("aria-current", "location");
+    else link.removeAttribute("aria-current");
+  }
+}
+
+if (articleSections.length && "IntersectionObserver" in window) {
+  const visibleSections = new Map();
+  const observer = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          visibleSections.set(entry.target.id, entry.boundingClientRect.top);
+        } else {
+          visibleSections.delete(entry.target.id);
+        }
+      }
+      const active = [...visibleSections.entries()].sort(
+        (a, b) => Math.abs(a[1]) - Math.abs(b[1]),
+      )[0];
+      if (active) markActiveSection(active[0]);
+    },
+    { rootMargin: "-18% 0px -68% 0px", threshold: [0, 0.1, 0.5] },
+  );
+  for (const section of articleSections) observer.observe(section);
+}
+
+function updateReadingProgress() {
+  if (!readingProgress) return;
+  const scrollable =
+    document.documentElement.scrollHeight - document.documentElement.clientHeight;
+  const progress = scrollable > 0 ? window.scrollY / scrollable : 0;
+  readingProgress.style.transform = `scaleX(${Math.min(1, Math.max(0, progress))})`;
+}
+
+if (readingProgress) {
+  updateReadingProgress();
+  window.addEventListener("scroll", updateReadingProgress, { passive: true });
+  window.addEventListener("resize", updateReadingProgress);
+}
 
 document.addEventListener("click", (event) => {
   const category = event.target.closest("[data-category-filter]");
