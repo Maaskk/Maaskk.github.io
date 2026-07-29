@@ -1078,8 +1078,8 @@
     "heroAlt": "Delegate machine",
     "maskedFlag": "user.txt + system.txt captured",
     "summary": "Guest SMB access exposed a domain credential, GenericWrite enabled targeted Kerberoasting, and unconstrained delegation produced domain-level compromise.",
-    "intro": "The Hack The Box activity record proves both the user and system objectives were captured on 05 April 2026. Because the original terminal history is unavailable, the technical sequence below is a careful reconstruction of the retired machine's public attack path—not a claim that every command is your exact keystroke.",
-    "evidenceNote": "Ownership is confirmed by the supplied HTB activity screenshot. The technical path is reconstructed from the public retired-machine walkthrough linked below; secrets and per-instance values remain masked.",
+    "intro": "Delegate is a Hack The Box machine. Your Hack The Box activity record proves both its user and system objectives were captured on 05 April 2026. Because the original terminal history is unavailable, the sequence below reconstructs the documented solution path without pretending every command is your exact keystroke.",
+    "evidenceNote": "Hack The Box ownership is confirmed by the supplied activity screenshot. The technical sequence is reconstructed from the documented Delegate solution path; secrets and per-instance values remain masked.",
     "tags": ["active-directory", "smb", "bloodhound", "kerberoasting", "unconstrained-delegation"],
     "tools": ["nmap", "netexec", "smbclient", "BloodHound", "Impacket", "krbrelayx"],
     "sections": [
@@ -1200,8 +1200,8 @@
     "heroAlt": "Build machine",
     "maskedFlag": "user.txt + system.txt captured",
     "summary": "An exposed Jenkins backup yielded a Gitea credential, a pipeline edit opened a container shell, and poisoned PowerDNS records unlocked passwordless rsh to the host.",
-    "intro": "The Hack The Box activity record proves both Build objectives were captured on 05 April 2026. With no original chat or terminal transcript, this note reconstructs the retired machine's documented attack chain while masking credentials, proof values, and instance-specific addresses.",
-    "evidenceNote": "Ownership is confirmed by the supplied HTB activity screenshot. The technical path is reconstructed from the public retired-machine walkthrough linked below.",
+    "intro": "Build is a Hack The Box machine. Your Hack The Box activity record proves both its user and system objectives were captured on 05 April 2026. With no original chat or terminal transcript, this note reconstructs the documented solution chain while masking credentials, proof values, and instance-specific addresses.",
+    "evidenceNote": "Hack The Box ownership is confirmed by the supplied activity screenshot. The technical sequence is reconstructed from the documented Build solution path.",
     "tags": ["jenkins", "gitea", "rsync", "docker", "powerdns", "rsh"],
     "tools": ["nmap", "rsync", "Jenkins offline decryptor", "chisel", "MariaDB", "rsh"],
     "sections": [

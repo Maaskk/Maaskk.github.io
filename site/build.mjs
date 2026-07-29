@@ -7,8 +7,7 @@ const output = path.join(root, "dist");
 const siteUrl = "https://maaskk.github.io";
 const githubUrl = "https://github.com/Maaskk";
 const htbUrl = "https://app.hackthebox.com/profile";
-const exosignalUrl = "https://ashad.medghazli.com";
-const assetVersion = "20260729-signal-blue";
+const assetVersion = "20260729-htb-clarity";
 const avatarSource =
   "https://berserk.fandom.com/wiki/File:1997_Anime_Guts_Portrait_in_the_post_Credit_Scene.png";
 
@@ -106,7 +105,6 @@ function sidebar() {
     <div class="rail-links">
       <a href="${githubUrl}" target="_blank" rel="noreferrer" aria-label="GitHub profile">GH</a>
       <a href="${htbUrl}" target="_blank" rel="noreferrer" aria-label="Hack The Box profile">HTB</a>
-      <a href="${exosignalUrl}" target="_blank" rel="noreferrer" aria-label="ExoSignal Observatory">EXO</a>
       <a href="/rss.xml" aria-label="RSS feed">RSS</a>
     </div>
     <a class="avatar-credit" href="${avatarSource}" target="_blank" rel="noreferrer">Guts · Berserk (1997) ↗</a>
@@ -281,7 +279,7 @@ const home = layout({
             </section>
             <section class="disclosure-card">
               <span class="status-dot"></span>
-              <div><strong>Evidence-aware notes</strong><p>Entries distinguish preserved session history from public-path reconstructions. Flags and per-instance secrets remain masked.</p></div>
+              <div><strong>Evidence-aware notes</strong><p>Entries distinguish preserved session history from documented reconstructions. Flags and per-instance secrets remain masked.</p></div>
             </section>
           </aside>
         </div>
@@ -313,7 +311,6 @@ const home = layout({
           <div class="profile-links">
             <a href="${githubUrl}" target="_blank" rel="noreferrer"><span>Code & projects</span><strong>GitHub ↗</strong></a>
             <a href="${htbUrl}" target="_blank" rel="noreferrer"><span>Labs & progress</span><strong>Hack The Box ↗</strong></a>
-            <a href="${exosignalUrl}" target="_blank" rel="noreferrer"><span>Exoplanet research</span><strong>ExoSignal Observatory ↗</strong></a>
             <a href="/rss.xml"><span>Follow updates</span><strong>RSS feed ↗</strong></a>
           </div>
         </div>
