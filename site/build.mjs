@@ -6,7 +6,9 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const output = path.join(root, "dist");
 const siteUrl = "https://maaskk.github.io";
 const githubUrl = "https://github.com/Maaskk";
-const htbUrl = "https://profile.hackthebox.com/";
+const htbUrl = "https://app.hackthebox.com/profile";
+const avatarSource =
+  "https://berserk.fandom.com/wiki/File:1997_Anime_Guts_Portrait_in_the_post_Credit_Scene.png";
 
 const escapeHtml = (value = "") =>
   String(value)
@@ -43,11 +45,12 @@ const formatDate = (value) =>
 const readingTime = (post) => {
   const words = [
     post.summary,
-    post.recon,
-    post.path,
-    post.escalation,
-    post.lessons,
-    ...(post.terminalSessions ?? []).flatMap((session) => session.lines ?? []),
+    post.intro,
+    ...(post.sections ?? []).flatMap((section) => [
+      section.body,
+      section.note,
+      ...(section.terminal?.lines ?? []),
+    ]),
   ]
     .join(" ")
     .trim()
@@ -79,11 +82,11 @@ const platforms = [...new Set(posts.map((post) => post.platform))].sort();
 function sidebar() {
   return `<aside class="profile-rail">
     <a class="identity" href="/" aria-label="F1LEO home">
-      <span class="identity-mark"><b>f1</b><i>leo</i></span>
-      <strong>F1LEO</strong>
+      <span class="avatar-frame"><img src="/media/guts-avatar.jpg" alt="Guts from Berserk"></span>
+      <strong>f1leo</strong>
       <small>#MA</small>
     </a>
-    <p class="identity-copy">Cybersecurity labs, research, and the notes I want to find again.</p>
+    <p class="identity-copy">Cybersecurity labs, AI security, forensics, and the paths that actually reached a flag.</p>
     <nav class="side-nav" aria-label="Journal navigation">
       <a href="/#home" data-view-link="home"><span>⌂</span>Home</a>
       <a href="/#categories" data-view-link="categories"><span>▤</span>Categories</a>
@@ -96,6 +99,7 @@ function sidebar() {
       <a href="${htbUrl}" target="_blank" rel="noreferrer" aria-label="Hack The Box profile">HTB</a>
       <a href="/rss.xml" aria-label="RSS feed">RSS</a>
     </div>
+    <a class="avatar-credit" href="${avatarSource}" target="_blank" rel="noreferrer">Guts · Berserk (1997) ↗</a>
   </aside>`;
 }
 
@@ -152,11 +156,12 @@ function postCard(post) {
     .toLowerCase();
   return `<article class="post-card" data-post-card data-search="${escapeHtml(searchable)}">
     <a href="/notes/${escapeHtml(post.slug)}/">
+      <span class="post-card-icon" aria-hidden="true">${escapeHtml(post.symbol || "›_")}</span>
       <div class="card-heading">
         <div>
           <span class="card-platform">${escapeHtml(post.platform)}</span>
           ${post.status === "active" ? '<span class="safe-label">spoiler-safe</span>' : ""}
-          ${post.evidence ? `<span class="evidence-label">${escapeHtml(post.evidence)}</span>` : ""}
+          <span class="evidence-label">${post.status === "completed" ? "captured" : "progress log"}</span>
         </div>
         <span class="card-arrow" aria-hidden="true">↗</span>
       </div>
@@ -236,18 +241,18 @@ const home = layout({
     ${topbar()}
     <main class="journal">
       <section class="view-panel active" data-view="home">
-        <div class="cover-card">
+        <div class="cover-card reference-cover">
           <div>
-            <span class="micro-label">F1LEO / CYBERSECURITY JOURNAL</span>
-            <h1>Notes from the field.</h1>
-            <p>Hack The Box, web security, infrastructure, and research—documented as I learn.</p>
+            <span class="micro-label">F1LEO / OFFENSIVE SECURITY NOTES</span>
+            <h1>Writeups and progress logs.</h1>
+            <p>Completed paths and substantial unfinished investigations reconstructed from my saved terminal history. No scoreboard filler, no invented completions.</p>
           </div>
           <a href="${htbUrl}" target="_blank" rel="noreferrer">f1leo on HTB ↗</a>
         </div>
         <div class="content-grid">
           <section class="post-feed" aria-label="Journal entries">
             <div class="feed-heading">
-              <div><span class="micro-label">LATEST</span><h2>Field notes</h2></div>
+              <div><span class="micro-label">LATEST</span><h2>Writeups & investigations</h2></div>
               <span><b data-visible-count>${posts.length}</b> published</span>
             </div>
             <div class="empty-search" data-empty-search hidden>No notes match that search.</div>
@@ -264,7 +269,7 @@ const home = layout({
             </section>
             <section class="disclosure-card">
               <span class="status-dot"></span>
-              <div><strong>Evidence-aware archive</strong><p>Recovered sessions are labeled. Secrets stay redacted, and missing steps are never invented.</p></div>
+              <div><strong>Recovered from real history</strong><p>Commands follow the saved Claude sessions. Flags and per-instance secrets show a recognizable prefix, then masking.</p></div>
             </section>
           </aside>
         </div>
@@ -290,8 +295,8 @@ const home = layout({
         <div class="about-grid">
           <article>
             <h2>I learn by breaking things carefully.</h2>
-            <p>This is my personal cybersecurity journal: labs, machines, techniques, failed assumptions, and the details worth keeping after the terminal closes.</p>
-            <p>I publish complete paths only when disclosure rules allow it. Active targets stay intentionally incomplete.</p>
+            <p>This is my personal cybersecurity journal: completed chains, substantial unfinished investigations, failed assumptions, and the commands worth keeping after the terminal closes.</p>
+            <p>Entries are reconstructed from my saved sessions. Incomplete labs state exactly where I stopped and never pretend the final flag was captured.</p>
           </article>
           <div class="profile-links">
             <a href="${githubUrl}" target="_blank" rel="noreferrer"><span>Code & projects</span><strong>GitHub ↗</strong></a>
@@ -303,95 +308,107 @@ const home = layout({
     </main>`,
 });
 
-function textSection(index, title, body) {
-  if (!body) return "";
-  return `<section class="article-section">
-    <div class="article-section-label"><span>${index}</span><h2>${title}</h2></div>
-    <div class="article-prose">${paragraphs(body)}</div>
+function terminalLine(line = "") {
+  const escaped = escapeHtml(line);
+  if (/^(flag_|N7SEC\{)/i.test(line.trim())) {
+    return `<span class="term-flag">${escaped}</span>`;
+  }
+  const command = line.match(/^(\$|#|[a-z0-9_-]+@[a-z0-9_-]+[#$]|PS>)\s?(.*)$/i);
+  if (command) {
+    return `<span class="term-prompt">${escapeHtml(command[1])}</span>${command[2] ? ` <span class="term-command">${escapeHtml(command[2])}</span>` : ""}`;
+  }
+  if (/^(HTTP\/|event:|data:|\[\*\]|\[\+\]|\[info\]|tool:|argument:)/i.test(line.trim())) {
+    return `<span class="term-info">${escaped}</span>`;
+  }
+  if (/^(error|cat:|permission denied|enoent)/i.test(line.trim())) {
+    return `<span class="term-error">${escaped}</span>`;
+  }
+  if (/^(uid=|root@|submission:|status:|result:)/i.test(line.trim())) {
+    return `<span class="term-success">${escaped}</span>`;
+  }
+  return `<span class="term-output">${escaped}</span>`;
+}
+
+function terminal(session) {
+  if (!session?.lines?.length) return "";
+  return `<figure class="terminal-window">
+    <figcaption>
+      <span class="terminal-lights" aria-hidden="true"><i></i><i></i><i></i></span>
+      <b>${escapeHtml(session.title || "terminal")}</b>
+      <small>reconstructed from saved history</small>
+    </figcaption>
+    <pre><code>${session.lines.map((line) => terminalLine(line)).join("\n")}</code></pre>
+  </figure>`;
+}
+
+function articleSection(section, index) {
+  const id = `step-${String(index + 1).padStart(2, "0")}`;
+  return `<section class="article-section" id="${id}">
+    <h2><span>${String(index + 1).padStart(2, "0")}</span>${escapeHtml(section.title)}</h2>
+    <div class="article-prose">${paragraphs(section.body)}</div>
+    ${terminal(section.terminal)}
+    ${section.note ? `<aside class="step-note"><strong>Why it mattered</strong>${paragraphs(section.note)}</aside>` : ""}
   </section>`;
 }
 
-function terminalSessions(sessions = []) {
-  if (!sessions.length) return "";
-  return `<section class="terminal-section">
-    <div class="terminal-section-heading">
-      <span class="micro-label">RECONSTRUCTED TERMINAL</span>
-      <p>Rebuilt from exported session history. Flags, credentials, tokens, hashes, and target addresses are redacted.</p>
+function comments(post) {
+  return `<section class="comments" id="comments">
+    <div class="comments-heading">
+      <div><span class="micro-label">DISCUSSION</span><h2>Comments</h2></div>
+      <p>Sign in with GitHub to join the discussion. Comments are stored as GitHub issues.</p>
     </div>
-    <div class="terminal-stack">
-      ${sessions
-        .map(
-          (session) => `<figure class="terminal-window">
-            <figcaption>
-              <span class="terminal-lights" aria-hidden="true"><i></i><i></i><i></i></span>
-              <b>${escapeHtml(session.title || "session")}</b>
-              <small>reconstruction</small>
-            </figcaption>
-            <pre><code>${escapeHtml((session.lines ?? []).join("\n"))}</code></pre>
-          </figure>`,
-        )
-        .join("")}
-    </div>
+    <script src="https://utteranc.es/client.js"
+      repo="Maaskk/Maaskk.github.io"
+      issue-term="pathname"
+      label="comments"
+      theme="github-dark"
+      crossorigin="anonymous"
+      async></script>
+    <noscript>Enable JavaScript to load GitHub comments for ${escapeHtml(post.title)}.</noscript>
   </section>`;
 }
 
 function article(post) {
-  const fullWriteup = post.status !== "active";
   const externalUrl = safeUrl(post.externalUrl);
-  const coverImage = safeAsset(post.coverImage);
-  const imageCreditUrl = safeUrl(post.imageCreditUrl);
+  const heroIcon = safeUrl(post.heroIcon);
+  const sections = post.sections ?? [];
   return layout({
     title: post.title,
     description: post.summary,
     canonical: `/notes/${post.slug}/`,
     article: true,
     content: `${topbar(post.platform, false)}
-      <main class="article-page">
-        <a class="back-link" href="/#home">← All field notes</a>
-        <header class="article-header">
-          <div class="article-kicker"><span>${escapeHtml(post.platform)}</span><span>${escapeHtml(post.kind.replace("-", " "))}</span><span>${formatDate(post.completedAt)}</span></div>
-          <h1>${escapeHtml(post.title)}</h1>
-          <p>${escapeHtml(post.summary)}</p>
-          <div class="article-facts">
-            <div><span>Target</span><strong>${escapeHtml(post.target || "—")}</strong></div>
-            <div><span>System</span><strong>${escapeHtml(post.operatingSystem)}</strong></div>
-            <div><span>Difficulty</span><strong>${escapeHtml(post.difficulty)}</strong></div>
-            <div><span>Read</span><strong>${readingTime(post)} min</strong></div>
-          </div>
-        </header>
-        ${
-          coverImage
-            ? `<figure class="article-cover">
-                <img src="${coverImage}" alt="${escapeHtml(post.coverAlt || "")}" loading="eager">
-                ${
-                  post.imageCredit
-                    ? `<figcaption>Photo: ${imageCreditUrl ? `<a href="${imageCreditUrl}" target="_blank" rel="noreferrer">${escapeHtml(post.imageCredit)}</a>` : escapeHtml(post.imageCredit)}</figcaption>`
-                    : ""
-                }
-              </figure>`
-            : ""
-        }
-        ${
-          post.evidenceNote
-            ? `<aside class="evidence-notice" data-evidence="${escapeHtml(post.evidence || "archive")}"><span>${escapeHtml(post.evidence || "archive")}</span><p>${escapeHtml(post.evidenceNote)}</p></aside>`
-            : ""
-        }
-        ${
-          post.status === "active"
-            ? `<aside class="spoiler-notice"><span>ACTIVE TARGET / REDACTED</span><p>This entry is intentionally limited to transferable observations. Attack paths, credentials, flags, and escalation details are not published.</p></aside>`
-            : ""
-        }
-        <div class="article-body">
-          ${textSection("01", "Reconnaissance", post.recon)}
-          ${fullWriteup ? textSection("02", "Attack path", post.path) : ""}
-          ${fullWriteup ? textSection("03", "Privilege escalation", post.escalation) : ""}
-          ${textSection(fullWriteup ? "04" : "02", "What survived", post.lessons)}
+      <main class="article-page reference-article">
+        <div class="article-column">
+          <a class="back-link" href="/#home">← All writeups</a>
+          <header class="article-header">
+            <div class="article-kicker"><span>${escapeHtml(post.platform)}</span><span>${escapeHtml(post.difficulty)}</span></div>
+            <h1>${escapeHtml(post.title)}</h1>
+            <div class="article-byline"><span>Posted ${formatDate(post.completedAt)}</span><span>By f1leo</span><span>${readingTime(post)} min read</span></div>
+            ${
+              heroIcon
+                ? `<figure class="machine-emblem"><img src="${heroIcon}" alt="${escapeHtml(post.heroAlt || `${post.title} icon`)}"><figcaption>${escapeHtml(post.target || "")}</figcaption></figure>`
+                : `<figure class="machine-emblem text-emblem"><span>${escapeHtml(post.symbol || "›_")}</span><figcaption>${escapeHtml(post.target || "")}</figcaption></figure>`
+            }
+            <p class="article-lead">${escapeHtml(post.intro || post.summary)}</p>
+            <div class="article-facts">
+              <div><span>Target</span><strong>${escapeHtml(post.target || "—")}</strong></div>
+              <div><span>System</span><strong>${escapeHtml(post.operatingSystem)}</strong></div>
+              <div><span>Flag</span><strong>${escapeHtml(post.maskedFlag || "captured")}</strong></div>
+            </div>
+          </header>
+          <aside class="evidence-notice"><span>Recovered writeup</span><p>${escapeHtml(post.evidenceNote || "Steps are reconstructed from saved terminal history. Per-instance secrets are partially masked.")}</p></aside>
+          <div class="article-body">${sections.map(articleSection).join("")}</div>
+          <footer class="article-footer">
+            <div><span class="micro-label">TOOLS / TAGS</span><div class="tag-cloud">${[...(post.tools ?? []), ...(post.tags ?? [])].map((item) => `<span class="tag">#${escapeHtml(item)}</span>`).join("")}</div></div>
+            ${externalUrl ? `<a href="${externalUrl}" target="_blank" rel="noreferrer">External reference ↗</a>` : '<a href="/#home">Return to journal →</a>'}
+          </footer>
+          ${comments(post)}
         </div>
-        ${terminalSessions(post.terminalSessions)}
-        <footer class="article-footer">
-          <div><span class="micro-label">TOOLS / TAGS</span><div class="tag-cloud">${[...(post.tools ?? []), ...(post.tags ?? [])].map((item) => `<span class="tag">#${escapeHtml(item)}</span>`).join("")}</div></div>
-          ${externalUrl ? `<a href="${externalUrl}" target="_blank" rel="noreferrer">External reference ↗</a>` : '<a href="/#home">Return to journal →</a>'}
-        </footer>
+        <aside class="article-toc">
+          <section><h2>Contents</h2><ol>${sections.map((section, index) => `<li><a href="#step-${String(index + 1).padStart(2, "0")}">${escapeHtml(section.title)}</a></li>`).join("")}<li><a href="#comments">Comments</a></li></ol></section>
+          <section><h2>Trending tags</h2><div class="tag-cloud">${(post.tags ?? []).slice(0, 7).map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}</div></section>
+        </aside>
       </main>`,
   });
 }
