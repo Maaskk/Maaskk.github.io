@@ -1,4 +1,4 @@
-import { copyFile, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { copyFile, cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -27,6 +27,11 @@ const safeUrl = (value = "") => {
   }
 };
 
+const safeAsset = (value = "") =>
+  /^\/[a-zA-Z0-9/_-]+\.(?:jpg|jpeg|png|webp|gif|svg)$/.test(value)
+    ? escapeHtml(value)
+    : "";
+
 const formatDate = (value) =>
   new Intl.DateTimeFormat("en", {
     day: "2-digit",
@@ -42,6 +47,7 @@ const readingTime = (post) => {
     post.path,
     post.escalation,
     post.lessons,
+    ...(post.terminalSessions ?? []).flatMap((session) => session.lines ?? []),
   ]
     .join(" ")
     .trim()
@@ -150,6 +156,7 @@ function postCard(post) {
         <div>
           <span class="card-platform">${escapeHtml(post.platform)}</span>
           ${post.status === "active" ? '<span class="safe-label">spoiler-safe</span>' : ""}
+          ${post.evidence ? `<span class="evidence-label">${escapeHtml(post.evidence)}</span>` : ""}
         </div>
         <span class="card-arrow" aria-hidden="true">↗</span>
       </div>
@@ -257,7 +264,7 @@ const home = layout({
             </section>
             <section class="disclosure-card">
               <span class="status-dot"></span>
-              <div><strong>Responsible disclosure</strong><p>Active machines stay spoiler-safe. Full paths appear after retirement.</p></div>
+              <div><strong>Evidence-aware archive</strong><p>Recovered sessions are labeled. Secrets stay redacted, and missing steps are never invented.</p></div>
             </section>
           </aside>
         </div>
@@ -304,9 +311,35 @@ function textSection(index, title, body) {
   </section>`;
 }
 
+function terminalSessions(sessions = []) {
+  if (!sessions.length) return "";
+  return `<section class="terminal-section">
+    <div class="terminal-section-heading">
+      <span class="micro-label">RECONSTRUCTED TERMINAL</span>
+      <p>Rebuilt from exported session history. Flags, credentials, tokens, hashes, and target addresses are redacted.</p>
+    </div>
+    <div class="terminal-stack">
+      ${sessions
+        .map(
+          (session) => `<figure class="terminal-window">
+            <figcaption>
+              <span class="terminal-lights" aria-hidden="true"><i></i><i></i><i></i></span>
+              <b>${escapeHtml(session.title || "session")}</b>
+              <small>reconstruction</small>
+            </figcaption>
+            <pre><code>${escapeHtml((session.lines ?? []).join("\n"))}</code></pre>
+          </figure>`,
+        )
+        .join("")}
+    </div>
+  </section>`;
+}
+
 function article(post) {
   const fullWriteup = post.status !== "active";
   const externalUrl = safeUrl(post.externalUrl);
+  const coverImage = safeAsset(post.coverImage);
+  const imageCreditUrl = safeUrl(post.imageCreditUrl);
   return layout({
     title: post.title,
     description: post.summary,
@@ -327,6 +360,23 @@ function article(post) {
           </div>
         </header>
         ${
+          coverImage
+            ? `<figure class="article-cover">
+                <img src="${coverImage}" alt="${escapeHtml(post.coverAlt || "")}" loading="eager">
+                ${
+                  post.imageCredit
+                    ? `<figcaption>Photo: ${imageCreditUrl ? `<a href="${imageCreditUrl}" target="_blank" rel="noreferrer">${escapeHtml(post.imageCredit)}</a>` : escapeHtml(post.imageCredit)}</figcaption>`
+                    : ""
+                }
+              </figure>`
+            : ""
+        }
+        ${
+          post.evidenceNote
+            ? `<aside class="evidence-notice" data-evidence="${escapeHtml(post.evidence || "archive")}"><span>${escapeHtml(post.evidence || "archive")}</span><p>${escapeHtml(post.evidenceNote)}</p></aside>`
+            : ""
+        }
+        ${
           post.status === "active"
             ? `<aside class="spoiler-notice"><span>ACTIVE TARGET / REDACTED</span><p>This entry is intentionally limited to transferable observations. Attack paths, credentials, flags, and escalation details are not published.</p></aside>`
             : ""
@@ -337,6 +387,7 @@ function article(post) {
           ${fullWriteup ? textSection("03", "Privilege escalation", post.escalation) : ""}
           ${textSection(fullWriteup ? "04" : "02", "What survived", post.lessons)}
         </div>
+        ${terminalSessions(post.terminalSessions)}
         <footer class="article-footer">
           <div><span class="micro-label">TOOLS / TAGS</span><div class="tag-cloud">${[...(post.tools ?? []), ...(post.tags ?? [])].map((item) => `<span class="tag">#${escapeHtml(item)}</span>`).join("")}</div></div>
           ${externalUrl ? `<a href="${externalUrl}" target="_blank" rel="noreferrer">External reference ↗</a>` : '<a href="/#home">Return to journal →</a>'}
@@ -375,6 +426,9 @@ await copyFile(path.join(root, "site", "styles.css"), path.join(output, "styles.
 await copyFile(path.join(root, "site", "app.js"), path.join(output, "app.js"));
 await copyFile(path.join(root, "site", "favicon.svg"), path.join(output, "favicon.svg"));
 await copyFile(path.join(root, "site", "og.jpg"), path.join(output, "og.jpg"));
+await cp(path.join(root, "site", "media"), path.join(output, "media"), {
+  recursive: true,
+});
 await writeFile(path.join(output, ".nojekyll"), "");
 
 for (const post of posts) {
