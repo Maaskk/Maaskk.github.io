@@ -81,8 +81,8 @@ const posts = raw
   )
   .sort(
     (a, b) =>
-      new Date(a.completedAt).getTime() - new Date(b.completedAt).getTime() ||
-      new Date(a.publishedAt).getTime() - new Date(b.publishedAt).getTime(),
+      new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime() ||
+      new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
   );
 
 const tags = [...new Set(posts.flatMap((post) => post.tags ?? []))].sort();
@@ -186,8 +186,7 @@ function postCard(post) {
 }
 
 function recentList() {
-  return [...posts]
-    .reverse()
+  return posts
     .slice(0, 5)
     .map(
       (post) =>
@@ -262,7 +261,7 @@ const home = layout({
         <div class="content-grid">
           <section class="post-feed" aria-label="Journal entries">
             <div class="feed-heading">
-              <div><span class="micro-label">OLDEST → NEWEST</span><h2>Writeups & investigations</h2></div>
+              <div><span class="micro-label">NEWEST → OLDEST</span><h2>Writeups & investigations</h2></div>
               <span><b data-visible-count>${posts.length}</b> published</span>
             </div>
             <div class="empty-search" data-empty-search hidden>No notes match that search.</div>
@@ -381,8 +380,9 @@ function comments(post) {
 function readingNeighbors(post) {
   const index = posts.findIndex((candidate) => candidate.slug === post.slug);
   return {
-    previous: index > 0 ? posts[index - 1] : null,
-    next: index >= 0 && index < posts.length - 1 ? posts[index + 1] : null,
+    previous:
+      index >= 0 && index < posts.length - 1 ? posts[index + 1] : null,
+    next: index > 0 ? posts[index - 1] : null,
   };
 }
 
