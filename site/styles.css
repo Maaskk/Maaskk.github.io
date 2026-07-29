@@ -1361,36 +1361,40 @@ a.tag:hover {
 
 /* 0x00Jeff-inspired reading layout: quiet chrome, readable posts, useful TOC. */
 :root {
-  --ink: #18181a;
-  --rail: #202021;
-  --surface: #202022;
-  --surface-solid: #202022;
-  --surface-hover: #262628;
-  --paper: #d8d8da;
-  --muted: #96969b;
-  --faint: #6f6f75;
-  --line: rgba(255, 255, 255, 0.075);
-  --line-strong: rgba(255, 255, 255, 0.14);
-  --copper: #91b723;
-  --copper-soft: #b5d334;
-  --safe: #8bc34a;
+  --ink: #0d0c0b;
+  --rail: rgba(15, 14, 13, 0.96);
+  --surface: rgba(25, 23, 21, 0.86);
+  --surface-solid: #191715;
+  --surface-hover: rgba(34, 31, 28, 0.94);
+  --paper: #eee8de;
+  --muted: #aaa39a;
+  --faint: #746e67;
+  --line: rgba(238, 232, 222, 0.12);
+  --line-strong: rgba(238, 232, 222, 0.22);
+  --copper: #c66b3e;
+  --copper-soft: #e1a17d;
+  --safe: #aabd8f;
   --sans: "Inter", "Helvetica Neue", Arial, sans-serif;
-  --serif: "Inter", "Helvetica Neue", Arial, sans-serif;
+  --serif: "Iowan Old Style", "Baskerville", "Times New Roman", serif;
   --rail-width: 286px;
 }
 
 .backdrop {
-  display: none;
+  display: block;
+  background:
+    linear-gradient(90deg, rgba(13, 12, 11, 0.84), rgba(13, 12, 11, 0.56)),
+    linear-gradient(180deg, rgba(13, 12, 11, 0.18), rgba(13, 12, 11, 0.83)),
+    url("/og.jpg") center / cover no-repeat;
 }
 
 .site-canvas {
-  background: var(--ink);
+  background: rgba(13, 12, 11, 0.48);
 }
 
 .profile-rail {
   padding: 42px 34px 28px;
-  background: var(--rail);
-  backdrop-filter: none;
+  background: rgba(15, 14, 13, 0.91);
+  backdrop-filter: blur(20px);
 }
 
 .avatar-frame {
@@ -1398,9 +1402,11 @@ a.tag:hover {
   aspect-ratio: 1;
   overflow: hidden;
   display: block;
-  border: 2px solid #b8b8ba;
+  border: 1px solid rgba(225, 161, 125, 0.72);
   border-radius: 50%;
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.32);
+  box-shadow:
+    0 18px 50px rgba(0, 0, 0, 0.42),
+    0 0 0 7px rgba(238, 232, 222, 0.025);
 }
 
 .avatar-frame img {
@@ -1412,10 +1418,10 @@ a.tag:hover {
 
 .identity > strong {
   margin-top: 22px;
-  font-family: var(--sans);
-  font-size: 28px;
-  font-weight: 750;
-  letter-spacing: -0.02em;
+  font-family: var(--serif);
+  font-size: 31px;
+  font-weight: 400;
+  letter-spacing: 0.01em;
 }
 
 .identity > small {
@@ -1425,8 +1431,8 @@ a.tag:hover {
 
 .identity-copy {
   margin: 20px 2px 32px;
-  font-family: var(--sans);
-  font-size: 14px;
+  font-family: var(--serif);
+  font-size: 15px;
   font-style: italic;
   line-height: 1.65;
   text-align: left;
@@ -1451,8 +1457,8 @@ a.tag:hover {
 
 .topbar {
   min-height: 64px;
-  background: rgba(24, 24, 26, 0.96);
-  backdrop-filter: blur(12px);
+  background: rgba(13, 12, 11, 0.82);
+  backdrop-filter: blur(18px);
 }
 
 .journal {
@@ -1464,18 +1470,20 @@ a.tag:hover {
   min-height: 230px;
   align-items: center;
   padding: 42px 48px;
-  background: #202022;
-  border-radius: 8px;
-  box-shadow: none;
+  background:
+    linear-gradient(90deg, rgba(13, 12, 11, 0.95) 0%, rgba(13, 12, 11, 0.63) 58%, rgba(13, 12, 11, 0.2)),
+    url("/og.jpg") center / cover;
+  border-radius: 18px;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.28);
 }
 
 .reference-cover h1 {
   max-width: 680px;
   margin: 14px 0;
-  font-family: var(--sans);
+  font-family: var(--serif);
   font-size: clamp(35px, 4.8vw, 62px);
-  font-weight: 700;
-  line-height: 1.02;
+  font-weight: 400;
+  line-height: 0.98;
   letter-spacing: -0.045em;
 }
 
@@ -1486,8 +1494,8 @@ a.tag:hover {
 
 .post-card {
   position: relative;
-  border-radius: 8px;
-  backdrop-filter: none;
+  border-radius: 14px;
+  backdrop-filter: blur(18px);
 }
 
 .post-card > a {
@@ -1503,17 +1511,18 @@ a.tag:hover {
   height: 42px;
   display: grid;
   place-items: center;
-  color: #151516;
+  color: var(--ink);
   background: var(--copper-soft);
-  border-radius: 8px;
+  border-radius: 9px;
+  box-shadow: 0 10px 28px rgba(198, 107, 62, 0.2);
   font: 800 15px/1 var(--mono);
 }
 
 .post-card h2 {
   margin: 16px 0 10px;
-  font-family: var(--sans);
+  font-family: var(--serif);
   font-size: clamp(24px, 2.7vw, 33px);
-  font-weight: 540;
+  font-weight: 400;
 }
 
 .post-card p {
@@ -1544,20 +1553,20 @@ a.tag:hover {
 
 .article-header {
   margin-top: 30px;
-  padding: 0;
-  background: transparent;
-  border: 0;
-  border-radius: 0;
-  backdrop-filter: none;
+  padding: clamp(32px, 4.5vw, 54px);
+  background: rgba(18, 16, 15, 0.87);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  backdrop-filter: blur(20px);
 }
 
 .article-header h1 {
   max-width: none;
   margin: 18px 0 22px;
-  font-family: var(--sans);
+  font-family: var(--serif);
   font-size: clamp(34px, 4.5vw, 54px);
-  font-weight: 520;
-  line-height: 1.12;
+  font-weight: 400;
+  line-height: 1.06;
   letter-spacing: -0.035em;
 }
 
@@ -1580,7 +1589,9 @@ a.tag:hover {
   padding: 28px;
   display: grid;
   place-items: center;
-  background: radial-gradient(circle, #29292c 0 55%, #202022 56%);
+  background:
+    radial-gradient(circle, rgba(38, 34, 31, 0.96) 0 55%, rgba(18, 16, 15, 0.98) 56%),
+    url("/og.jpg") center / cover;
   border: 10px solid var(--copper);
   border-radius: 50%;
   box-shadow: 0 0 0 4px #222224, 0 14px 40px rgba(0, 0, 0, 0.34);
@@ -1606,7 +1617,8 @@ a.tag:hover {
 
 .article-lead {
   margin: 32px 0 0;
-  color: #b3b3b7;
+  color: #c1b9af;
+  font-family: var(--serif);
   font-size: 16px;
   line-height: 1.85;
 }
@@ -1630,9 +1642,9 @@ a.tag:hover {
 .evidence-notice {
   margin-top: 30px;
   grid-template-columns: 150px 1fr;
-  background: rgba(145, 183, 35, 0.055);
-  border-color: rgba(145, 183, 35, 0.24);
-  border-radius: 6px;
+  background: rgba(22, 18, 15, 0.9);
+  border-color: rgba(198, 107, 62, 0.3);
+  border-radius: 12px;
 }
 
 .evidence-notice span {
@@ -1641,25 +1653,30 @@ a.tag:hover {
 
 .article-body {
   margin-top: 28px;
-  padding: 0;
-  background: transparent;
-  border: 0;
-  border-radius: 0;
-  backdrop-filter: none;
+  padding: 0 clamp(28px, 5vw, 58px);
+  background: rgba(18, 16, 15, 0.9);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  backdrop-filter: blur(20px);
 }
 
 .article-section {
   display: block;
-  padding: 42px 0 18px;
-  border-bottom: 0;
+  padding: 46px 0 50px;
+  border-bottom: 1px solid var(--line);
   scroll-margin-top: 85px;
+}
+
+.article-section:last-child {
+  border-bottom: 0;
 }
 
 .article-section h2 {
   margin: 0 0 18px;
   color: #dedee0;
-  font-size: 26px;
-  font-weight: 540;
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 400;
   line-height: 1.25;
 }
 
@@ -1670,7 +1687,7 @@ a.tag:hover {
 }
 
 .article-prose p {
-  color: #adadb2;
+  color: #c6beb4;
   font-size: 15px;
   line-height: 1.85;
 }
@@ -1679,7 +1696,10 @@ a.tag:hover {
   margin: 24px 0 0;
   background: #0c0d0e;
   border-color: rgba(255, 255, 255, 0.11);
-  border-radius: 7px;
+  border-radius: 12px;
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.34),
+    inset 0 1px rgba(255, 255, 255, 0.025);
 }
 
 .terminal-window figcaption {
@@ -1731,7 +1751,7 @@ a.tag:hover {
   margin-top: 18px;
   padding: 17px 20px;
   color: var(--muted);
-  background: #202022;
+  background: rgba(31, 28, 25, 0.9);
   border-left: 3px solid var(--copper);
 }
 
@@ -1805,8 +1825,9 @@ a.tag:hover {
 
 .comments-heading h2 {
   margin: 8px 0 0;
+  font-family: var(--serif);
   font-size: 26px;
-  font-weight: 540;
+  font-weight: 400;
 }
 
 .comments-heading p {
@@ -1843,7 +1864,9 @@ a.tag:hover {
   .reference-cover {
     min-height: 300px;
     padding: 28px;
-    background: #202022;
+    background:
+      linear-gradient(0deg, rgba(13, 12, 11, 0.95), rgba(13, 12, 11, 0.22)),
+      url("/og.jpg") 66% center / cover;
   }
 
   .post-card > a {
