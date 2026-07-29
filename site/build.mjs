@@ -67,26 +67,45 @@ const posts = raw
       new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
   );
 
-const mark = `
-  <svg aria-hidden="true" viewBox="0 0 48 48" class="brand-mark">
-    <path d="M8 8h32v32H8z"></path>
-    <path d="M14 16h20M14 24h12M14 32h20"></path>
-    <path d="m29 22 5 5-5 5"></path>
-  </svg>`;
+const tags = [...new Set(posts.flatMap((post) => post.tags ?? []))].sort();
+const platforms = [...new Set(posts.map((post) => post.platform))].sort();
+
+function sidebar() {
+  return `<aside class="profile-rail">
+    <a class="identity" href="/" aria-label="F1LEO home">
+      <span class="identity-mark"><b>f1</b><i>leo</i></span>
+      <strong>F1LEO</strong>
+      <small>#MA</small>
+    </a>
+    <p class="identity-copy">Cybersecurity labs, research, and the notes I want to find again.</p>
+    <nav class="side-nav" aria-label="Journal navigation">
+      <a href="/#home" data-view-link="home"><span>⌂</span>Home</a>
+      <a href="/#categories" data-view-link="categories"><span>▤</span>Categories</a>
+      <a href="/#tags" data-view-link="tags"><span>◇</span>Tags</a>
+      <a href="/#archives" data-view-link="archives"><span>▣</span>Archives</a>
+      <a href="/#about" data-view-link="about"><span>●</span>About</a>
+    </nav>
+    <div class="rail-links">
+      <a href="${githubUrl}" target="_blank" rel="noreferrer" aria-label="GitHub profile">GH</a>
+      <a href="${htbUrl}" target="_blank" rel="noreferrer" aria-label="Hack The Box profile">HTB</a>
+      <a href="/rss.xml" aria-label="RSS feed">RSS</a>
+    </div>
+  </aside>`;
+}
 
 function layout({ title, description, canonical, content, article = false }) {
   const pageTitle =
-    title === "F1LEO — Field Notes" ? title : `${title} — F1LEO`;
+    title === "F1LEO — Cybersecurity Journal" ? title : `${title} — F1LEO`;
   const url = `${siteUrl}${canonical}`;
   return `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#0b0b0a">
+    <meta name="theme-color" content="#0d0c0b">
     <meta name="description" content="${escapeHtml(description)}">
     <link rel="canonical" href="${url}">
-    <link rel="alternate" type="application/rss+xml" title="F1LEO Field Notes" href="${siteUrl}/rss.xml">
+    <link rel="alternate" type="application/rss+xml" title="F1LEO Cybersecurity Journal" href="${siteUrl}/rss.xml">
     <link rel="stylesheet" href="/styles.css">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <meta property="og:type" content="${article ? "article" : "website"}">
@@ -98,145 +117,183 @@ function layout({ title, description, canonical, content, article = false }) {
     <title>${escapeHtml(pageTitle)}</title>
   </head>
   <body>
-    <div class="noise" aria-hidden="true"></div>
-    <header class="site-header">
-      <a href="/" class="brand" aria-label="F1LEO Field Notes home">
-        ${mark}
-        <span><b>F1LEO</b><small>FIELD NOTES / #MA</small></span>
-      </a>
-      <nav aria-label="Primary navigation">
-        <a href="/#notes">Notes</a>
-        <a href="/#protocol">Protocol</a>
-        <a href="${githubUrl}" target="_blank" rel="noreferrer">GitHub ↗</a>
-        <a href="${htbUrl}" target="_blank" rel="noreferrer" title="Hack The Box handle: f1leo #MA">HTB ↗</a>
-      </nav>
-    </header>
-    ${content}
-    <footer class="site-footer">
-      <div>
-        <span class="eyebrow">END OF TRANSMISSION</span>
-        <p>Built from evidence, not aesthetics alone.</p>
+    <div class="backdrop" aria-hidden="true"></div>
+    <div class="app-shell">
+      ${sidebar()}
+      <div class="site-canvas">
+        ${content}
+        <footer class="site-footer">
+          <span>© <span data-year>2026</span> F1LEO</span>
+          <span>Built on GitHub Pages · <a href="/rss.xml">RSS</a></span>
+        </footer>
       </div>
-      <div class="footer-links">
-        <a href="/rss.xml">RSS</a>
-        <a href="${githubUrl}" target="_blank" rel="noreferrer">Source ↗</a>
-      </div>
-      <p class="footer-signature">f1leo // #MA · <span data-year>2026</span></p>
-    </footer>
+    </div>
     <script src="/app.js" defer></script>
   </body>
 </html>`;
 }
 
-function noteRow(post, index) {
-  return `
-    <a href="/notes/${escapeHtml(post.slug)}/" class="note-row" data-platform="${escapeHtml(post.platform)}">
-      <span class="row-index">${String(index + 1).padStart(2, "0")}</span>
-      <div class="row-title">
-        <div class="row-tags">
-          <span>${escapeHtml(post.platform)}</span>
-          <span>${escapeHtml(post.difficulty)}</span>
-          ${post.status === "active" ? '<span class="safe-label">SPOILER-SAFE</span>' : ""}
+function postCard(post) {
+  const searchable = [
+    post.title,
+    post.summary,
+    post.platform,
+    post.difficulty,
+    ...(post.tags ?? []),
+    ...(post.tools ?? []),
+  ]
+    .join(" ")
+    .toLowerCase();
+  return `<article class="post-card" data-post-card data-search="${escapeHtml(searchable)}">
+    <a href="/notes/${escapeHtml(post.slug)}/">
+      <div class="card-heading">
+        <div>
+          <span class="card-platform">${escapeHtml(post.platform)}</span>
+          ${post.status === "active" ? '<span class="safe-label">spoiler-safe</span>' : ""}
         </div>
-        <h3>${escapeHtml(post.title)}</h3>
-        <p>${escapeHtml(post.summary)}</p>
+        <span class="card-arrow" aria-hidden="true">↗</span>
       </div>
-      <div class="row-meta">
-        <span>${formatDate(post.completedAt)}</span>
-        <span>${escapeHtml(post.operatingSystem)}</span>
-        <b>↗</b>
+      <h2>${escapeHtml(post.title)}</h2>
+      <p>${escapeHtml(post.summary)}</p>
+      <div class="card-meta">
+        <span>▣ ${formatDate(post.completedAt)}</span>
+        <span>▰ ${escapeHtml(post.difficulty)}</span>
+        <span>◷ ${readingTime(post)} min</span>
       </div>
-    </a>`;
+    </a>
+  </article>`;
 }
 
-const featured = posts.find((post) => post.featured) ?? posts[0];
-const htbCount = posts.filter((post) => post.platform === "Hack The Box").length;
-const toolCount = new Set(posts.flatMap((post) => post.tools ?? [])).size;
-const filters = ["All", "Hack The Box", "PortSwigger", "CTF", "Home Lab", "Research"];
+function recentList() {
+  return posts
+    .slice(0, 5)
+    .map(
+      (post) =>
+        `<li><a href="/notes/${escapeHtml(post.slug)}/">${escapeHtml(post.title)}</a><time>${formatDate(post.completedAt)}</time></li>`,
+    )
+    .join("");
+}
+
+function topbar(label = "Home", includeSearch = true) {
+  return `<header class="topbar">
+    <button class="menu-button" type="button" aria-label="Open navigation" aria-expanded="false">☰</button>
+    <span class="crumb"><a href="/">F1LEO</a><i>/</i><b data-page-label>${escapeHtml(label)}</b></span>
+    ${
+      includeSearch
+        ? `<label class="search-box">
+            <span aria-hidden="true">⌕</span>
+            <input type="search" placeholder="Search notes…" aria-label="Search journal entries" data-search-input>
+            <kbd>/</kbd>
+          </label>`
+        : `<a class="top-link" href="/#home">Back to journal</a>`
+    }
+  </header>`;
+}
+
+const categoryCards = platforms
+  .map((platform) => {
+    const count = posts.filter((post) => post.platform === platform).length;
+    return `<a class="taxonomy-card" href="/#home" data-category-filter="${escapeHtml(platform)}">
+      <span>${String(count).padStart(2, "0")}</span>
+      <strong>${escapeHtml(platform)}</strong>
+      <small>${count === 1 ? "entry" : "entries"}</small>
+    </a>`;
+  })
+  .join("");
+
+const tagCloud = tags.length
+  ? tags
+      .map(
+        (tag) =>
+          `<a href="/#home" class="tag" data-tag-filter="${escapeHtml(tag)}">#${escapeHtml(tag)}</a>`,
+      )
+      .join("")
+  : '<span class="empty-copy">Tags appear as notes are published.</span>';
+
+const archiveRows = posts
+  .map(
+    (post) => `<a class="archive-row" href="/notes/${escapeHtml(post.slug)}/">
+      <time>${formatDate(post.completedAt)}</time>
+      <strong>${escapeHtml(post.title)}</strong>
+      <span>${escapeHtml(post.platform)}</span>
+    </a>`,
+  )
+  .join("");
 
 const home = layout({
-  title: "F1LEO — Field Notes",
+  title: "F1LEO — Cybersecurity Journal",
   description:
-    "Machines. Methods. Mistakes worth remembering. An offensive security field journal by f1leo.",
+    "Cybersecurity labs, Hack The Box notes, research, and writeups by f1leo.",
   canonical: "/",
   content: `
-  <main>
-    <section class="hero">
-      <div class="hero-rail" aria-hidden="true">
-        <span>35.7595° N</span><span>05.8340° W</span>
-      </div>
-      <div class="hero-copy">
-        <span class="eyebrow">OFFENSIVE SECURITY / PERSONAL ARCHIVE</span>
-        <h1>Machines. Methods.<br><em>Mistakes worth remembering.</em></h1>
-        <p>A field journal by <strong>f1leo</strong>, documenting labs, attack paths, failed assumptions, and the lessons left after root.</p>
-        <div class="hero-actions">
-          <a href="#notes" class="button-primary">Enter the archive <span>↓</span></a>
-          <a href="${githubUrl}" target="_blank" rel="noreferrer" class="button-quiet">github.com/Maaskk ↗</a>
+    ${topbar()}
+    <main class="journal">
+      <section class="view-panel active" data-view="home">
+        <div class="cover-card">
+          <div>
+            <span class="micro-label">F1LEO / CYBERSECURITY JOURNAL</span>
+            <h1>Notes from the field.</h1>
+            <p>Hack The Box, web security, infrastructure, and research—documented as I learn.</p>
+          </div>
+          <a href="${htbUrl}" target="_blank" rel="noreferrer">f1leo on HTB ↗</a>
         </div>
-      </div>
-      <div class="hero-signal" aria-hidden="true">
-        <div class="signal-orbit orbit-one"></div>
-        <div class="signal-orbit orbit-two"></div>
-        <div class="signal-orbit orbit-three"></div>
-        <div class="signal-core"><span>F1</span><small>LEO</small></div>
-        <p>OBSERVE → TEST → DOCUMENT</p>
-      </div>
-      <div class="hero-stats">
-        <div><strong>${String(posts.length).padStart(2, "0")}</strong><span>published notes</span></div>
-        <div><strong>${String(htbCount).padStart(2, "0")}</strong><span>HTB records</span></div>
-        <div><strong>${String(toolCount).padStart(2, "0")}</strong><span>tools indexed</span></div>
-        <div class="status-live"><i></i><span>archive online</span></div>
-      </div>
-    </section>
+        <div class="content-grid">
+          <section class="post-feed" aria-label="Journal entries">
+            <div class="feed-heading">
+              <div><span class="micro-label">LATEST</span><h2>Field notes</h2></div>
+              <span><b data-visible-count>${posts.length}</b> published</span>
+            </div>
+            <div class="empty-search" data-empty-search hidden>No notes match that search.</div>
+            ${posts.map(postCard).join("")}
+          </section>
+          <aside class="discovery">
+            <section>
+              <h2>Recently updated</h2>
+              <ol>${recentList()}</ol>
+            </section>
+            <section>
+              <h2>Tags</h2>
+              <div class="tag-cloud">${tagCloud}</div>
+            </section>
+            <section class="disclosure-card">
+              <span class="status-dot"></span>
+              <div><strong>Responsible disclosure</strong><p>Active machines stay spoiler-safe. Full paths appear after retirement.</p></div>
+            </section>
+          </aside>
+        </div>
+      </section>
 
-    <section class="journal-section" id="notes">
-      ${
-        featured
-          ? `<a href="/notes/${escapeHtml(featured.slug)}/" class="featured-note">
-              <div class="featured-index">01</div>
-              <div class="featured-copy">
-                <span class="eyebrow">LATEST TRANSMISSION</span>
-                <h2>${escapeHtml(featured.title)}</h2>
-                <p>${escapeHtml(featured.summary)}</p>
-                <span class="text-link">Read field note →</span>
-              </div>
-              <div class="featured-meta">
-                <span>${escapeHtml(featured.platform)}</span>
-                <span>${formatDate(featured.completedAt)}</span>
-                <span>${readingTime(featured)} min read</span>
-              </div>
-            </a>`
-          : ""
-      }
-      <div class="index-toolbar">
-        <div>
-          <span class="eyebrow">ARCHIVE / <span data-visible-count>${String(posts.length).padStart(2, "0")}</span></span>
-          <h2>Collected evidence</h2>
-        </div>
-        <div class="filters" aria-label="Filter journal entries">
-          ${filters
-            .map(
-              (filter, index) =>
-                `<button type="button" data-filter="${filter}" class="${index === 0 ? "active" : ""}" aria-pressed="${index === 0}">${filter === "Hack The Box" ? "HTB" : filter}</button>`,
-            )
-            .join("")}
-        </div>
-      </div>
-      <div class="notes-list">${posts.map(noteRow).join("")}</div>
-    </section>
+      <section class="view-panel" data-view="categories" hidden>
+        <header class="section-intro"><span class="micro-label">BROWSE</span><h1>Categories</h1><p>Notes grouped by the place the work happened.</p></header>
+        <div class="taxonomy-grid">${categoryCards || '<span class="empty-copy">Categories appear as notes are published.</span>'}</div>
+      </section>
 
-    <section class="protocol" id="protocol">
-      <div class="protocol-heading">
-        <span class="eyebrow">DISCLOSURE PROTOCOL</span>
-        <h2>Useful without ruining the work.</h2>
-      </div>
-      <div class="protocol-grid">
-        <article><span>01</span><h3>Active machines stay safe.</h3><p>Only high-level observations, methodology, and lessons. No flags, credentials, footholds, or privilege-escalation paths.</p></article>
-        <article><span>02</span><h3>Retired means reproducible.</h3><p>Full writeups preserve the chain of evidence: recon, exploitation, escalation, dead ends, and what made the difference.</p></article>
-        <article><span>03</span><h3>Every note earns its place.</h3><p>The archive favors transferable ideas over flag screenshots and command dumps. If it teaches nothing, it stays private.</p></article>
-      </div>
-    </section>
-  </main>`,
+      <section class="view-panel" data-view="tags" hidden>
+        <header class="section-intro"><span class="micro-label">INDEX</span><h1>Tags</h1><p>Tools, techniques, and subjects across the journal.</p></header>
+        <div class="large-tag-cloud">${tagCloud}</div>
+      </section>
+
+      <section class="view-panel" data-view="archives" hidden>
+        <header class="section-intro"><span class="micro-label">TIMELINE</span><h1>Archives</h1><p>Everything published, newest first.</p></header>
+        <div class="archive-list">${archiveRows}</div>
+      </section>
+
+      <section class="view-panel" data-view="about" hidden>
+        <header class="section-intro"><span class="micro-label">ABOUT</span><h1>f1leo <em>#MA</em></h1></header>
+        <div class="about-grid">
+          <article>
+            <h2>I learn by breaking things carefully.</h2>
+            <p>This is my personal cybersecurity journal: labs, machines, techniques, failed assumptions, and the details worth keeping after the terminal closes.</p>
+            <p>I publish complete paths only when disclosure rules allow it. Active targets stay intentionally incomplete.</p>
+          </article>
+          <div class="profile-links">
+            <a href="${githubUrl}" target="_blank" rel="noreferrer"><span>Code & projects</span><strong>GitHub ↗</strong></a>
+            <a href="${htbUrl}" target="_blank" rel="noreferrer"><span>Labs & progress</span><strong>Hack The Box ↗</strong></a>
+            <a href="/rss.xml"><span>Follow updates</span><strong>RSS feed ↗</strong></a>
+          </div>
+        </div>
+      </section>
+    </main>`,
 });
 
 function textSection(index, title, body) {
@@ -255,35 +312,36 @@ function article(post) {
     description: post.summary,
     canonical: `/notes/${post.slug}/`,
     article: true,
-    content: `<main class="article-page">
-      <div class="article-topline"><a href="/#notes">← Archive</a><span>ENTRY / ${escapeHtml(post.slug.toUpperCase())}</span></div>
-      <header class="article-header">
-        <div class="article-kicker"><span>${escapeHtml(post.platform)}</span><span>${escapeHtml(post.kind.replace("-", " "))}</span><span>${formatDate(post.completedAt)}</span></div>
-        <h1>${escapeHtml(post.title)}</h1>
-        <p>${escapeHtml(post.summary)}</p>
-        <div class="article-facts">
-          <div><span>Target</span><strong>${escapeHtml(post.target || "—")}</strong></div>
-          <div><span>System</span><strong>${escapeHtml(post.operatingSystem)}</strong></div>
-          <div><span>Difficulty</span><strong>${escapeHtml(post.difficulty)}</strong></div>
-          <div><span>Read</span><strong>${readingTime(post)} min</strong></div>
+    content: `${topbar(post.platform, false)}
+      <main class="article-page">
+        <a class="back-link" href="/#home">← All field notes</a>
+        <header class="article-header">
+          <div class="article-kicker"><span>${escapeHtml(post.platform)}</span><span>${escapeHtml(post.kind.replace("-", " "))}</span><span>${formatDate(post.completedAt)}</span></div>
+          <h1>${escapeHtml(post.title)}</h1>
+          <p>${escapeHtml(post.summary)}</p>
+          <div class="article-facts">
+            <div><span>Target</span><strong>${escapeHtml(post.target || "—")}</strong></div>
+            <div><span>System</span><strong>${escapeHtml(post.operatingSystem)}</strong></div>
+            <div><span>Difficulty</span><strong>${escapeHtml(post.difficulty)}</strong></div>
+            <div><span>Read</span><strong>${readingTime(post)} min</strong></div>
+          </div>
+        </header>
+        ${
+          post.status === "active"
+            ? `<aside class="spoiler-notice"><span>ACTIVE TARGET / REDACTED</span><p>This entry is intentionally limited to transferable observations. Attack paths, credentials, flags, and escalation details are not published.</p></aside>`
+            : ""
+        }
+        <div class="article-body">
+          ${textSection("01", "Reconnaissance", post.recon)}
+          ${fullWriteup ? textSection("02", "Attack path", post.path) : ""}
+          ${fullWriteup ? textSection("03", "Privilege escalation", post.escalation) : ""}
+          ${textSection(fullWriteup ? "04" : "02", "What survived", post.lessons)}
         </div>
-      </header>
-      ${
-        post.status === "active"
-          ? `<aside class="spoiler-notice"><span>ACTIVE TARGET / REDACTED</span><p>This entry is intentionally limited to transferable observations. The attack path, credentials, flags, and escalation chain are not published.</p></aside>`
-          : ""
-      }
-      <div class="article-body">
-        ${textSection("01", "Reconnaissance", post.recon)}
-        ${fullWriteup ? textSection("02", "Attack path", post.path) : ""}
-        ${fullWriteup ? textSection("03", "Privilege escalation", post.escalation) : ""}
-        ${textSection(fullWriteup ? "04" : "02", "What survived", post.lessons)}
-      </div>
-      <footer class="article-footer">
-        <div class="tool-index"><span class="eyebrow">TOOLS / TAGS</span><div>${[...(post.tools ?? []), ...(post.tags ?? [])].map((item) => `<span>${escapeHtml(item)}</span>`).join("")}</div></div>
-        ${externalUrl ? `<a href="${externalUrl}" target="_blank" rel="noreferrer">External reference ↗</a>` : '<a href="/#notes">Return to archive →</a>'}
-      </footer>
-    </main>`,
+        <footer class="article-footer">
+          <div><span class="micro-label">TOOLS / TAGS</span><div class="tag-cloud">${[...(post.tools ?? []), ...(post.tags ?? [])].map((item) => `<span class="tag">#${escapeHtml(item)}</span>`).join("")}</div></div>
+          ${externalUrl ? `<a href="${externalUrl}" target="_blank" rel="noreferrer">External reference ↗</a>` : '<a href="/#home">Return to journal →</a>'}
+        </footer>
+      </main>`,
   });
 }
 
@@ -301,9 +359,9 @@ function rss() {
     .join("\n");
   return `<?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0"><channel>
-<title>F1LEO — Field Notes</title>
+<title>F1LEO — Cybersecurity Journal</title>
 <link>${siteUrl}</link>
-<description>Offensive security field notes by f1leo.</description>
+<description>Cybersecurity field notes by f1leo.</description>
 <language>en</language>
 ${items}
 </channel></rss>`;
@@ -326,10 +384,10 @@ for (const post of posts) {
 }
 
 const notFound = layout({
-  title: "Signal lost",
+  title: "Not found",
   description: "The requested field note could not be found.",
   canonical: "/404.html",
-  content: `<main class="not-found"><span class="eyebrow">404 / SIGNAL LOST</span><h1>No evidence at this coordinate.</h1><p>The entry may have moved, been redacted, or never existed.</p><a href="/" class="button-primary">Return to archive →</a></main>`,
+  content: `${topbar("404", false)}<main class="not-found"><span class="micro-label">404 / NOT FOUND</span><h1>No note at this address.</h1><p>It may have moved, been redacted, or never existed.</p><a href="/" class="action-link">Return home →</a></main>`,
 });
 await writeFile(path.join(output, "404.html"), notFound);
 
