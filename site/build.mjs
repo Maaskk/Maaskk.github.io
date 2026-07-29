@@ -7,6 +7,7 @@ const output = path.join(root, "dist");
 const siteUrl = "https://maaskk.github.io";
 const githubUrl = "https://github.com/Maaskk";
 const htbUrl = "https://app.hackthebox.com/profile";
+const assetVersion = "20260729-field-journal";
 const avatarSource =
   "https://berserk.fandom.com/wiki/File:1997_Anime_Guts_Portrait_in_the_post_Credit_Scene.png";
 
@@ -116,7 +117,7 @@ function layout({ title, description, canonical, content, article = false }) {
     <meta name="description" content="${escapeHtml(description)}">
     <link rel="canonical" href="${url}">
     <link rel="alternate" type="application/rss+xml" title="F1LEO Cybersecurity Journal" href="${siteUrl}/rss.xml">
-    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/styles.css?v=${assetVersion}">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <meta property="og:type" content="${article ? "article" : "website"}">
     <meta property="og:title" content="${escapeHtml(pageTitle)}">
