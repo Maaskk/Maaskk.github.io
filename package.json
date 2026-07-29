@@ -1,0 +1,10 @@
+{
+  "name": "maaskk-github-io",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node site/build.mjs",
+    "dev": "node site/build.mjs && npx serve dist"
+  }
+}

@@ -1,0 +1,9 @@
+node_modules
+dist
+studio/.next
+studio/node_modules
+studio/.vercel
+.env*
+!studio/.env.example
+npm-debug.log*
+.DS_Store

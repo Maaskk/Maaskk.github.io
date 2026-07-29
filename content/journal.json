@@ -1,0 +1,24 @@
+[
+  {
+    "schemaVersion": 1,
+    "slug": "signal-starts-here",
+    "title": "Signal starts here.",
+    "platform": "Research",
+    "target": "Field Journal",
+    "difficulty": "Unrated",
+    "operatingSystem": "Mixed",
+    "status": "not-applicable",
+    "kind": "research",
+    "completedAt": "2026-07-29",
+    "publishedAt": "2026-07-29T00:00:00.000Z",
+    "summary": "A living record of machines, mistakes, attack paths, and the small observations that survive after the shell closes.",
+    "tags": ["journal", "methodology", "offsec"],
+    "tools": [],
+    "recon": "This journal exists to make the work legible. Every entry starts with what was visible, what looked wrong, and which assumption was worth testing.",
+    "path": "Full attack paths appear only when a target is retired or the material is safe to disclose. Active machines receive spoiler-safe field notes.",
+    "escalation": "The point is not the flag. The useful part is the decision trail: why one route died, why another opened, and what should be remembered next time.",
+    "lessons": "Write while the evidence is fresh. Separate observation from inference. Keep the commands that mattered. Remove secrets. Publish what teaches.",
+    "externalUrl": "",
+    "featured": true
+  }
+]
