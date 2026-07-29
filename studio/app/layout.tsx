@@ -68,7 +68,7 @@ export default function RootLayout({
               GitHub ↗
             </a>
             <a
-              href="https://app.hackthebox.com/"
+              href="https://app.hackthebox.com/profile/f1leo"
               target="_blank"
               rel="noreferrer"
               title="Hack The Box handle: f1leo #MA"

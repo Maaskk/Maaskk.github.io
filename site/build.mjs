@@ -6,7 +6,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const output = path.join(root, "dist");
 const siteUrl = "https://maaskk.github.io";
 const githubUrl = "https://github.com/Maaskk";
-const htbUrl = "https://profile.hackthebox.com";
+const htbUrl = "https://app.hackthebox.com/profile/f1leo";
 
 const escapeHtml = (value = "") =>
   String(value)
