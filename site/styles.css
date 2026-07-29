@@ -2138,6 +2138,10 @@ input:focus-visible {
     overflow-x: clip;
   }
 
+  .app-shell {
+    z-index: auto;
+  }
+
   .profile-rail {
     width: min(304px, 86vw);
     padding:
