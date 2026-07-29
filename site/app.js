@@ -80,6 +80,18 @@ menuButton?.addEventListener("click", () => {
   menuButton.setAttribute("aria-expanded", String(open));
 });
 
+document.addEventListener("click", (event) => {
+  if (
+    !document.body.classList.contains("nav-open") ||
+    event.target.closest(".profile-rail") ||
+    event.target.closest(".menu-button")
+  ) {
+    return;
+  }
+  document.body.classList.remove("nav-open");
+  menuButton?.setAttribute("aria-expanded", "false");
+});
+
 for (const link of tocLinks) {
   link.addEventListener("click", (event) => {
     const id = link.getAttribute("href")?.slice(1);

@@ -7,7 +7,7 @@ const output = path.join(root, "dist");
 const siteUrl = "https://maaskk.github.io";
 const githubUrl = "https://github.com/Maaskk";
 const htbUrl = "https://app.hackthebox.com/profile";
-const assetVersion = "20260729-htb-clarity";
+const assetVersion = "20260729-mobile-layout";
 const avatarSource =
   "https://berserk.fandom.com/wiki/File:1997_Anime_Guts_Portrait_in_the_post_Credit_Scene.png";
 

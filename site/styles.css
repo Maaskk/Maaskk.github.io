@@ -2126,3 +2126,309 @@ input:focus-visible {
     text-align: left;
   }
 }
+
+/*
+ * Phone layout overrides live last on purpose. The reading theme above keeps
+ * the desktop composition intact, while these rules win the cascade only
+ * below the existing mobile breakpoint.
+ */
+@media (max-width: 780px) {
+  html,
+  body {
+    overflow-x: clip;
+  }
+
+  .profile-rail {
+    width: min(304px, 86vw);
+    padding:
+      max(24px, env(safe-area-inset-top))
+      22px
+      max(20px, env(safe-area-inset-bottom));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .avatar-frame {
+    width: 132px;
+  }
+
+  .identity > strong {
+    margin-top: 14px;
+    font-size: 27px;
+  }
+
+  .identity + .side-nav {
+    margin-top: 22px;
+  }
+
+  .side-nav {
+    gap: 4px;
+  }
+
+  .side-nav a {
+    min-height: 44px;
+  }
+
+  .rail-links {
+    margin-top: 28px;
+  }
+
+  .topbar {
+    padding-inline:
+      max(14px, env(safe-area-inset-left))
+      max(14px, env(safe-area-inset-right));
+    gap: 12px;
+  }
+
+  .search-box {
+    min-width: 0;
+    width: calc(100vw - 78px);
+  }
+
+  .search-box kbd {
+    display: none;
+  }
+
+  .journal {
+    width: calc(100% - 28px);
+    padding: 14px 0 54px;
+  }
+
+  .reference-cover {
+    min-height: 270px;
+    padding: 24px;
+    background:
+      linear-gradient(0deg, rgba(8, 11, 15, 0.96), rgba(8, 11, 15, 0.28)),
+      url("/og.jpg") 66% center / cover;
+  }
+
+  .reference-cover h1 {
+    font-size: clamp(35px, 11vw, 48px);
+    line-height: 1;
+  }
+
+  .reference-cover > a {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .content-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+    margin-top: 24px;
+  }
+
+  .feed-heading {
+    min-height: 60px;
+  }
+
+  .post-card > a {
+    min-height: 0;
+    padding: 22px;
+  }
+
+  .post-card-icon {
+    width: 38px;
+    height: 38px;
+    margin-bottom: 14px;
+  }
+
+  .post-card h2 {
+    font-size: clamp(25px, 8vw, 32px);
+  }
+
+  .card-heading > div {
+    min-width: 0;
+  }
+
+  .card-platform,
+  .evidence-label {
+    line-height: 1.55;
+  }
+
+  .card-meta {
+    gap: 10px 16px;
+  }
+
+  .discovery {
+    display: block;
+    padding-top: 0;
+  }
+
+  .discovery > section {
+    padding: 22px 0;
+  }
+
+  .section-intro {
+    padding: 34px 24px;
+  }
+
+  .section-intro h1 {
+    font-size: clamp(38px, 12vw, 52px);
+  }
+
+  .taxonomy-grid,
+  .about-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .archive-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .reference-article {
+    width: calc(100% - 28px);
+    padding: 14px 0 54px;
+  }
+
+  .article-header {
+    margin-top: 16px;
+    padding: 25px 20px;
+    border-radius: 14px;
+  }
+
+  .article-header h1 {
+    font-size: clamp(32px, 10.5vw, 42px);
+    line-height: 1.08;
+    overflow-wrap: anywhere;
+  }
+
+  .article-byline {
+    gap: 8px 14px;
+  }
+
+  .machine-emblem {
+    width: 164px;
+    min-height: 164px;
+    margin: 28px auto 22px;
+    padding: 20px;
+    border-width: 7px;
+  }
+
+  .machine-emblem img {
+    width: 88px;
+    height: 88px;
+  }
+
+  .text-emblem span {
+    font-size: 46px;
+  }
+
+  .article-lead {
+    margin-top: 24px;
+    font-size: 16px;
+    line-height: 1.72;
+  }
+
+  .mobile-toc {
+    margin-top: 16px;
+  }
+
+  .article-facts {
+    margin-top: 24px;
+  }
+
+  .article-facts > div {
+    min-height: 0;
+    padding: 15px 16px;
+  }
+
+  .evidence-notice {
+    margin-top: 22px;
+    padding: 18px;
+    gap: 10px;
+  }
+
+  .article-body {
+    margin-top: 18px;
+    padding: 0 20px;
+    border-radius: 14px;
+  }
+
+  .article-section {
+    padding: 32px 0 36px;
+    scroll-margin-top: 74px;
+  }
+
+  .article-section h2 {
+    font-size: 24px;
+  }
+
+  .article-prose p {
+    font-size: 15.5px;
+    line-height: 1.78;
+    overflow-wrap: anywhere;
+  }
+
+  .terminal-window {
+    margin-top: 18px;
+    border-radius: 10px;
+  }
+
+  .terminal-window figcaption {
+    padding-inline: 12px;
+    gap: 8px;
+  }
+
+  .terminal-window pre {
+    padding: 18px 14px;
+    font-size: 11px;
+    line-height: 1.65;
+  }
+
+  .step-note,
+  .post-navigation a,
+  .further-reading-grid a {
+    padding: 18px;
+  }
+
+  .post-navigation {
+    padding: 28px 0 42px;
+  }
+
+  .comments {
+    min-height: 220px;
+    padding-top: 34px;
+  }
+
+  .site-footer {
+    min-height: 96px;
+    padding: 20px 16px;
+  }
+}
+
+@media (max-width: 380px) {
+  .journal,
+  .reference-article {
+    width: calc(100% - 20px);
+  }
+
+  .reference-cover,
+  .article-header {
+    padding-inline: 18px;
+  }
+
+  .article-body {
+    padding-inline: 16px;
+  }
+}
+
+@media (max-width: 780px) and (max-height: 700px) {
+  .avatar-frame {
+    width: 104px;
+  }
+
+  .identity > strong {
+    margin-top: 10px;
+    font-size: 24px;
+  }
+
+  .identity + .side-nav {
+    margin-top: 14px;
+  }
+
+  .rail-links {
+    margin-top: 18px;
+  }
+}
