@@ -225,6 +225,11 @@ input {
   transform: translateY(-2px);
 }
 
+.rail-links svg {
+  width: 19px;
+  height: 19px;
+}
+
 .site-canvas {
   min-width: 0;
   min-height: 100vh;
@@ -792,6 +797,19 @@ a.tag:hover {
 .profile-links span {
   color: var(--faint);
   font-size: 11px;
+}
+
+.profile-links .profile-link-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.profile-link-label svg {
+  width: 18px;
+  height: 18px;
+  color: var(--copper-soft);
+  flex: 0 0 auto;
 }
 
 .profile-links strong {

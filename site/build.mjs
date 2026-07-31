@@ -86,6 +86,16 @@ const posts = raw
 const tags = [...new Set(posts.flatMap((post) => post.tags ?? []))].sort();
 const platforms = [...new Set(posts.map((post) => post.platform))].sort();
 
+function brandIcon(name) {
+  if (name === "github") {
+    return `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 .7a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2.24c-3.22.7-3.9-1.37-3.9-1.37-.52-1.34-1.28-1.7-1.28-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.73-1.55-2.57-.29-5.28-1.28-5.28-5.69 0-1.26.45-2.28 1.19-3.08-.12-.29-.52-1.46.11-3.04 0 0 .97-.31 3.16 1.18A10.96 10.96 0 0 1 12 6.12c.98 0 1.96.13 2.88.39 2.2-1.49 3.16-1.18 3.16-1.18.63 1.58.23 2.75.11 3.04.74.8 1.19 1.82 1.19 3.08 0 4.42-2.71 5.39-5.29 5.68.42.36.79 1.07.79 2.16v3.26c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .7Z"/></svg>`;
+  }
+  if (name === "hackthebox") {
+    return `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="m12 1 9.4 5.43v11.14L12 23l-9.4-5.43V6.43L12 1Zm0 2.54L5.92 7.05 12 10.56l6.08-3.51L12 3.54Zm-7.2 5.4v7.36l6.1 3.52v-7.37L4.8 8.94Zm14.4 0-6.1 3.51v7.37l6.1-3.52V8.94Z"/></svg>`;
+  }
+  return `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M5.2 3.1v3.25c6.86 0 12.45 5.59 12.45 12.45h3.25c0-8.66-7.04-15.7-15.7-15.7Zm0 6.2v3.25a6.26 6.26 0 0 1 6.25 6.25h3.25c0-5.24-4.26-9.5-9.5-9.5Zm2.25 7.15a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z"/></svg>`;
+}
+
 function sidebar() {
   return `<aside class="profile-rail">
     <a class="identity" href="/" aria-label="F1LEO home">
@@ -101,9 +111,9 @@ function sidebar() {
       <a href="/#about" data-view-link="about"><span>●</span>About</a>
     </nav>
     <div class="rail-links">
-      <a href="${githubUrl}" target="_blank" rel="noreferrer" aria-label="GitHub profile">GH</a>
-      <a href="${htbUrl}" target="_blank" rel="noreferrer" aria-label="Hack The Box profile">HTB</a>
-      <a href="/rss.xml" aria-label="RSS feed">RSS</a>
+      <a href="${githubUrl}" target="_blank" rel="noreferrer" aria-label="GitHub profile">${brandIcon("github")}</a>
+      <a href="${htbUrl}" target="_blank" rel="noreferrer" aria-label="Hack The Box profile">${brandIcon("hackthebox")}</a>
+      <a href="/rss.xml" aria-label="RSS feed">${brandIcon("rss")}</a>
     </div>
     <a class="avatar-credit" href="${avatarSource}" target="_blank" rel="noreferrer">Guts · Berserk (1997) ↗</a>
   </aside>`;
@@ -301,9 +311,9 @@ const home = layout({
             <p>Flags, credentials, and instance addresses are masked.</p>
           </article>
           <div class="profile-links">
-            <a href="${githubUrl}" target="_blank" rel="noreferrer"><span>Code & projects</span><strong>GitHub ↗</strong></a>
-            <a href="${htbUrl}" target="_blank" rel="noreferrer"><span>Labs & progress</span><strong>Hack The Box ↗</strong></a>
-            <a href="/rss.xml"><span>Follow updates</span><strong>RSS feed ↗</strong></a>
+            <a href="${githubUrl}" target="_blank" rel="noreferrer"><span class="profile-link-label">${brandIcon("github")}Code & projects</span><strong>GitHub ↗</strong></a>
+            <a href="${htbUrl}" target="_blank" rel="noreferrer"><span class="profile-link-label">${brandIcon("hackthebox")}Labs & progress</span><strong>Hack The Box ↗</strong></a>
+            <a href="/rss.xml"><span class="profile-link-label">${brandIcon("rss")}Follow updates</span><strong>RSS feed ↗</strong></a>
           </div>
         </div>
       </section>
