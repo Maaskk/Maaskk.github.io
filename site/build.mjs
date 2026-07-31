@@ -7,7 +7,7 @@ const output = path.join(root, "dist");
 const siteUrl = "https://maaskk.github.io";
 const githubUrl = "https://github.com/Maaskk";
 const htbUrl = "https://app.hackthebox.com/profile";
-const assetVersion = "20260729-mobile-menu";
+const assetVersion = "20260731-copy-cleanup";
 const avatarSource =
   "https://berserk.fandom.com/wiki/File:1997_Anime_Guts_Portrait_in_the_post_Credit_Scene.png";
 
@@ -46,7 +46,6 @@ const formatDate = (value) =>
 const readingTime = (post) => {
   const words = [
     post.summary,
-    post.intro,
     ...(post.sections ?? []).flatMap((section) => [
       section.body,
       section.note,
@@ -113,7 +112,7 @@ function sidebar() {
 
 function layout({ title, description, canonical, content, article = false }) {
   const pageTitle =
-    title === "F1LEO — Cybersecurity Journal" ? title : `${title} — F1LEO`;
+    title === "F1LEO: Cybersecurity Journal" ? title : `${title}: F1LEO`;
   const url = `${siteUrl}${canonical}`;
   return `<!doctype html>
 <html lang="en">
@@ -143,7 +142,7 @@ function layout({ title, description, canonical, content, article = false }) {
         ${content}
         <footer class="site-footer">
           <span>© <span data-year>2026</span> F1LEO</span>
-          <span>Built on GitHub Pages · <a href="/rss.xml">RSS</a></span>
+          <span>GitHub Pages / <a href="/rss.xml">RSS</a></span>
         </footer>
       </div>
     </div>
@@ -170,7 +169,7 @@ function postCard(post) {
         <div>
           <span class="card-platform">${escapeHtml(post.platform)}</span>
           ${post.status === "active" ? '<span class="safe-label">spoiler-safe</span>' : ""}
-          <span class="evidence-label">${post.status === "completed" ? "captured" : "progress log"}</span>
+          <span class="evidence-label">${post.status === "completed" ? "solved" : "unfinished"}</span>
         </div>
         <span class="card-arrow" aria-hidden="true">↗</span>
       </div>
@@ -242,9 +241,8 @@ const archiveRows = posts
   .join("");
 
 const home = layout({
-  title: "F1LEO — Cybersecurity Journal",
-  description:
-    "Cybersecurity labs, Hack The Box notes, research, and writeups by f1leo.",
+  title: "F1LEO: Cybersecurity Journal",
+  description: "Lab notes by f1leo.",
   canonical: "/",
   content: `
     ${topbar()}
@@ -252,16 +250,16 @@ const home = layout({
       <section class="view-panel active" data-view="home">
         <div class="cover-card reference-cover">
           <div>
-            <span class="micro-label">F1LEO / FIELD JOURNAL</span>
-            <h1>Writeups and progress logs.</h1>
-            <p>A chronological record of solved labs and investigations that produced a real technical result.</p>
+            <span class="micro-label">F1LEO / LAB NOTES</span>
+            <h1>Writeups.</h1>
+            <p>Commands and findings from systems I worked on.</p>
           </div>
           <a href="${htbUrl}" target="_blank" rel="noreferrer">f1leo on HTB ↗</a>
         </div>
         <div class="content-grid">
           <section class="post-feed" aria-label="Journal entries">
             <div class="feed-heading">
-              <div><span class="micro-label">NEWEST → OLDEST</span><h2>Writeups & investigations</h2></div>
+              <div><span class="micro-label">NEWEST → OLDEST</span><h2>Lab notes</h2></div>
               <span><b data-visible-count>${posts.length}</b> published</span>
             </div>
             <div class="empty-search" data-empty-search hidden>No notes match that search.</div>
@@ -276,26 +274,22 @@ const home = layout({
               <h2>Tags</h2>
               <div class="tag-cloud">${tagCloud}</div>
             </section>
-            <section class="disclosure-card">
-              <span class="status-dot"></span>
-              <div><strong>Evidence-aware notes</strong><p>Entries distinguish preserved session history from documented reconstructions. Flags and per-instance secrets remain masked.</p></div>
-            </section>
           </aside>
         </div>
       </section>
 
       <section class="view-panel" data-view="categories" hidden>
-        <header class="section-intro"><span class="micro-label">BROWSE</span><h1>Categories</h1><p>Notes grouped by the place the work happened.</p></header>
+        <header class="section-intro"><span class="micro-label">BROWSE</span><h1>Categories</h1><p>Grouped by platform.</p></header>
         <div class="taxonomy-grid">${categoryCards || '<span class="empty-copy">Categories appear as notes are published.</span>'}</div>
       </section>
 
       <section class="view-panel" data-view="tags" hidden>
-        <header class="section-intro"><span class="micro-label">INDEX</span><h1>Tags</h1><p>Tools, techniques, and subjects across the journal.</p></header>
+        <header class="section-intro"><span class="micro-label">INDEX</span><h1>Tags</h1><p>Tools and techniques.</p></header>
         <div class="large-tag-cloud">${tagCloud}</div>
       </section>
 
       <section class="view-panel" data-view="archives" hidden>
-        <header class="section-intro"><span class="micro-label">TIMELINE</span><h1>Archives</h1><p>Everything published, from the first solved lab to the latest.</p></header>
+        <header class="section-intro"><span class="micro-label">TIMELINE</span><h1>Archives</h1><p>Newest first.</p></header>
         <div class="archive-list">${archiveRows}</div>
       </section>
 
@@ -303,9 +297,9 @@ const home = layout({
         <header class="section-intro"><span class="micro-label">ABOUT</span><h1>f1leo <em>#MA</em></h1></header>
         <div class="about-grid">
           <article>
-            <h2>I learn by breaking things carefully.</h2>
-            <p>This is my personal cybersecurity journal: completed chains, substantial unfinished investigations, failed assumptions, and the commands worth keeping after the terminal closes.</p>
-            <p>Entries are reconstructed from my saved sessions. Incomplete labs state exactly where I stopped and never pretend the final flag was captured.</p>
+            <h2>Security student in Morocco.</h2>
+            <p>I keep commands and notes from the labs I work on.</p>
+            <p>Flags, credentials, and instance addresses are masked.</p>
           </article>
           <div class="profile-links">
             <a href="${githubUrl}" target="_blank" rel="noreferrer"><span>Code & projects</span><strong>GitHub ↗</strong></a>
@@ -344,7 +338,7 @@ function terminal(session) {
     <figcaption>
       <span class="terminal-lights" aria-hidden="true"><i></i><i></i><i></i></span>
       <b>${escapeHtml(session.title || "terminal")}</b>
-      <small>reconstructed lab record</small>
+      <small>lab notes</small>
     </figcaption>
     <pre><code>${session.lines.map((line) => terminalLine(line)).join("\n")}</code></pre>
   </figure>`;
@@ -356,7 +350,7 @@ function articleSection(section, index) {
     <h2><span>${String(index + 1).padStart(2, "0")}</span>${escapeHtml(section.title)}</h2>
     <div class="article-prose">${paragraphs(section.body)}</div>
     ${terminal(section.terminal)}
-    ${section.note ? `<aside class="step-note"><strong>Why it mattered</strong>${paragraphs(section.note)}</aside>` : ""}
+    ${section.note ? `<aside class="step-note"><strong>Note</strong>${paragraphs(section.note)}</aside>` : ""}
   </section>`;
 }
 
@@ -364,7 +358,7 @@ function comments(post) {
   return `<section class="comments" id="comments">
     <div class="comments-heading">
       <div><span class="micro-label">DISCUSSION</span><h2>Comments</h2></div>
-      <p>Sign in with GitHub to join the discussion. Comments are stored as GitHub issues.</p>
+      <p>GitHub account required.</p>
     </div>
     <script src="https://utteranc.es/client.js"
       repo="Maaskk/Maaskk.github.io"
@@ -446,14 +440,13 @@ function article(post) {
                 ? `<figure class="machine-emblem"><img src="${heroIcon}" alt="${escapeHtml(post.heroAlt || `${post.title} icon`)}"><figcaption>${escapeHtml(post.target || "")}</figcaption></figure>`
                 : `<figure class="machine-emblem text-emblem"><span>${escapeHtml(post.symbol || "›_")}</span><figcaption>${escapeHtml(post.target || "")}</figcaption></figure>`
             }
-            <p class="article-lead">${escapeHtml(post.intro || post.summary)}</p>
+            <p class="article-lead">${escapeHtml(post.summary)}</p>
             <div class="article-facts">
-              <div><span>Target</span><strong>${escapeHtml(post.target || "—")}</strong></div>
+              <div><span>Target</span><strong>${escapeHtml(post.target || "n/a")}</strong></div>
               <div><span>System</span><strong>${escapeHtml(post.operatingSystem)}</strong></div>
               <div><span>Result</span><strong>${escapeHtml(post.maskedFlag || "captured")}</strong></div>
             </div>
           </header>
-          <aside class="evidence-notice"><span>Provenance</span><p>${escapeHtml(post.evidenceNote || "Sensitive values, proof strings, credentials, and per-instance identifiers are intentionally masked.")}</p></aside>
           <details class="mobile-toc">
             <summary>On this page <span aria-hidden="true">⌄</span></summary>
             <ol>${tocItems}</ol>
@@ -498,9 +491,9 @@ function rss() {
     .join("\n");
   return `<?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0"><channel>
-<title>F1LEO — Cybersecurity Journal</title>
+<title>F1LEO: Cybersecurity Journal</title>
 <link>${siteUrl}</link>
-<description>Cybersecurity field notes by f1leo.</description>
+<description>Lab notes by f1leo.</description>
 <language>en</language>
 ${items}
 </channel></rss>`;
@@ -527,9 +520,9 @@ for (const post of posts) {
 
 const notFound = layout({
   title: "Not found",
-  description: "The requested field note could not be found.",
+  description: "Page not found.",
   canonical: "/404.html",
-  content: `${topbar("404", false)}<main class="not-found"><span class="micro-label">404 / NOT FOUND</span><h1>No note at this address.</h1><p>It may have moved, been redacted, or never existed.</p><a href="/" class="action-link">Return home →</a></main>`,
+  content: `${topbar("404", false)}<main class="not-found"><span class="micro-label">404 / NOT FOUND</span><h1>Page not found.</h1><a href="/" class="action-link">Return home →</a></main>`,
 });
 await writeFile(path.join(output, "404.html"), notFound);
 
