@@ -7,7 +7,7 @@ const output = path.join(root, "dist");
 const siteUrl = "https://maaskk.github.io";
 const githubUrl = "https://github.com/Maaskk";
 const htbUrl = "https://app.hackthebox.com/profile";
-const assetVersion = "20260731-copy-cleanup";
+const assetVersion = "20260731-official-machine-art";
 const avatarSource =
   "https://berserk.fandom.com/wiki/File:1997_Anime_Guts_Portrait_in_the_post_Credit_Scene.png";
 
@@ -48,7 +48,6 @@ const readingTime = (post) => {
     post.summary,
     ...(post.sections ?? []).flatMap((section) => [
       section.body,
-      section.note,
       ...(section.terminal?.lines ?? []),
     ]),
   ]
@@ -338,7 +337,7 @@ function terminal(session) {
     <figcaption>
       <span class="terminal-lights" aria-hidden="true"><i></i><i></i><i></i></span>
       <b>${escapeHtml(session.title || "terminal")}</b>
-      <small>lab notes</small>
+      <small>session.log</small>
     </figcaption>
     <pre><code>${session.lines.map((line) => terminalLine(line)).join("\n")}</code></pre>
   </figure>`;
@@ -350,8 +349,18 @@ function articleSection(section, index) {
     <h2><span>${String(index + 1).padStart(2, "0")}</span>${escapeHtml(section.title)}</h2>
     <div class="article-prose">${paragraphs(section.body)}</div>
     ${terminal(section.terminal)}
-    ${section.note ? `<aside class="step-note"><strong>Note</strong>${paragraphs(section.note)}</aside>` : ""}
   </section>`;
+}
+
+function articleVisual(post) {
+  const image = safeAsset(post.heroImage);
+  if (!image) return "";
+  const source = safeUrl(post.heroSource);
+  const credit = escapeHtml(post.heroCredit || "Image source");
+  return `<figure class="article-photo">
+    <img src="${image}" alt="${escapeHtml(post.heroAlt || `${post.target || post.title} artwork`)}">
+    ${source ? `<figcaption><a href="${source}" target="_blank" rel="noreferrer">${credit} ↗</a></figcaption>` : ""}
+  </figure>`;
 }
 
 function comments(post) {
@@ -412,7 +421,6 @@ function compactPostLink(post) {
 
 function article(post) {
   const externalUrl = safeUrl(post.externalUrl);
-  const heroIcon = safeUrl(post.heroIcon);
   const sections = post.sections ?? [];
   const { previous, next } = readingNeighbors(post);
   const related = relatedPosts(post);
@@ -435,11 +443,7 @@ function article(post) {
             <div class="article-kicker"><span>${escapeHtml(post.platform)}</span><span>${escapeHtml(post.difficulty)}</span></div>
             <h1>${escapeHtml(post.title)}</h1>
             <div class="article-byline"><span>Posted ${formatDate(post.completedAt)}</span><span>By f1leo</span><span>${readingTime(post)} min read</span></div>
-            ${
-              heroIcon
-                ? `<figure class="machine-emblem"><img src="${heroIcon}" alt="${escapeHtml(post.heroAlt || `${post.title} icon`)}"><figcaption>${escapeHtml(post.target || "")}</figcaption></figure>`
-                : `<figure class="machine-emblem text-emblem"><span>${escapeHtml(post.symbol || "›_")}</span><figcaption>${escapeHtml(post.target || "")}</figcaption></figure>`
-            }
+            ${articleVisual(post)}
             <p class="article-lead">${escapeHtml(post.summary)}</p>
             <div class="article-facts">
               <div><span>Target</span><strong>${escapeHtml(post.target || "n/a")}</strong></div>

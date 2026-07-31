@@ -1580,37 +1580,34 @@ a.tag:hover {
   margin-left: auto;
 }
 
-.machine-emblem {
-  width: 230px;
-  min-height: 230px;
-  margin: 42px auto 30px;
-  padding: 28px;
-  display: grid;
-  place-items: center;
-  background:
-    radial-gradient(circle, rgba(26, 35, 45, 0.96) 0 55%, rgba(13, 18, 24, 0.98) 56%),
-    url("/og.jpg") center / cover;
-  border: 10px solid var(--copper);
-  border-radius: 50%;
-  box-shadow: 0 0 0 4px #222224, 0 14px 40px rgba(0, 0, 0, 0.34);
+.article-photo {
+  width: min(100%, 560px);
+  margin: 38px auto 30px;
 }
 
-.machine-emblem img {
-  width: 112px;
-  height: 112px;
-  object-fit: contain;
+.article-photo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  box-shadow: 0 24px 55px rgba(0, 0, 0, 0.34);
 }
 
-.machine-emblem figcaption {
-  max-width: 150px;
-  color: var(--muted);
-  font: 10px/1.3 var(--mono);
-  text-align: center;
+.article-photo figcaption {
+  margin-top: 8px;
+  text-align: right;
+  font: 9px/1.4 var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
 }
 
-.text-emblem span {
-  color: var(--paper);
-  font: 800 58px/1 var(--mono);
+.article-photo figcaption a {
+  color: var(--faint);
+}
+
+.article-photo figcaption a:hover {
+  color: var(--text);
 }
 
 .article-lead {
@@ -1743,25 +1740,6 @@ a.tag:hover {
 
 .term-error {
   color: #ff7b72;
-}
-
-.step-note {
-  margin-top: 18px;
-  padding: 17px 20px;
-  color: var(--muted);
-  background: rgba(21, 29, 38, 0.92);
-  border-left: 3px solid var(--copper);
-}
-
-.step-note strong {
-  color: var(--paper);
-  font-size: 12px;
-}
-
-.step-note p {
-  margin: 7px 0 0;
-  font-size: 13px;
-  line-height: 1.7;
 }
 
 .article-toc {
@@ -2095,11 +2073,6 @@ input:focus-visible {
     margin-left: 0;
   }
 
-  .machine-emblem {
-    width: 190px;
-    min-height: 190px;
-  }
-
   .article-facts {
     grid-template-columns: 1fr;
   }
@@ -2302,21 +2275,9 @@ input:focus-visible {
     gap: 8px 14px;
   }
 
-  .machine-emblem {
-    width: 164px;
-    min-height: 164px;
+  .article-photo {
+    width: 100%;
     margin: 28px auto 22px;
-    padding: 20px;
-    border-width: 7px;
-  }
-
-  .machine-emblem img {
-    width: 88px;
-    height: 88px;
-  }
-
-  .text-emblem span {
-    font-size: 46px;
   }
 
   .article-lead {
@@ -2381,7 +2342,6 @@ input:focus-visible {
     line-height: 1.65;
   }
 
-  .step-note,
   .post-navigation a,
   .further-reading-grid a {
     padding: 18px;
